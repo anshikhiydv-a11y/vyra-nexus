@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>VYRA Nexus</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0b1020;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 700px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 18px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 4px 20px;
+      border-bottom: 1px solid #27304a;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .status {
+      color: #65e6a6;
+      font-size: 13px;
+    }
+
+    .chat {
+      flex: 1;
+      padding: 25px 0;
+    }
+
+    .message {
+      background: #18213a;
+      padding: 16px;
+      border-radius: 16px;
+      max-width: 85%;
+      line-height: 1.5;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+      padding-top: 15px;
+      border-top: 1px solid #27304a;
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 15px;
+      border-radius: 14px;
+      font-size: 16px;
+      background: #18213a;
+      color: white;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 14px 17px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .send {
+      background: #6d7cff;
+      color: white;
+    }
+
+    .mic {
+      background: #27304a;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <header>
+      <div class="logo">VYRA NEXUS</div>
+      <div class="status">● SYSTEM ONLINE</div>
+    </header>
+
+    <section class="chat">
+
+      <div class="message">
+        Hello, Boss 👋<br>
+        मैं VYRA Nexus हूँ।<br>
+        मेरा AI ecosystem अभी initialize हो रहा है।
+      </div>
+
+    </section>
+
+    <section class="input-area">
+
+      <input
+        type="text"
+        placeholder="VYRA से कुछ पूछें..."
+      >
+
+      <button class="mic">🎤</button>
+
+      <button class="send">➤</button>
+
+    </section>
+
+  </main>
+
+</body>
+  </html>
