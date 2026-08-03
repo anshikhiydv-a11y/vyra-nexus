@@ -29,7 +29,6 @@
     .app {
       width: 100%;
       max-width: 700px;
-
       min-height: 100vh;
 
       margin: auto;
@@ -44,30 +43,23 @@
 
     header {
       display: flex;
-
       justify-content: space-between;
-
       align-items: center;
 
       padding: 12px 4px 20px;
 
-      border-bottom:
-        1px solid #27304a;
+      border-bottom: 1px solid #27304a;
     }
 
     .logo {
       font-size: 24px;
-
       font-weight: bold;
-
       letter-spacing: 2px;
     }
 
     .status {
       color: #65e6a6;
-
       font-size: 13px;
-
       white-space: nowrap;
     }
 
@@ -77,7 +69,6 @@
       flex: 1;
 
       display: flex;
-
       flex-direction: column;
 
       gap: 14px;
@@ -124,12 +115,7 @@
 
       padding-bottom: 10px;
 
-      border-top:
-        1px solid #27304a;
-
-      position: sticky;
-
-      bottom: 0;
+      border-top: 1px solid #27304a;
 
       background: #0b1020;
     }
@@ -182,7 +168,7 @@
       color: white;
     }
 
-    /* Small Phone Screen */
+    /* Small Phone Screens */
 
     @media (max-width: 450px) {
 
@@ -208,9 +194,12 @@
 
 </head>
 
+
 <body>
 
   <main class="app">
+
+    <!-- Header -->
 
     <header>
 
@@ -225,6 +214,8 @@
     </header>
 
 
+    <!-- Chat Area -->
+
     <section class="chat">
 
       <div class="message">
@@ -237,13 +228,15 @@
 
         <br>
 
-        मेरा AI ecosystem
-        अभी initialize हो रहा है।
+        मेरा Master AI Core
+        और Chat Agent online हैं।
 
       </div>
 
     </section>
 
+
+    <!-- Input Area -->
 
     <section class="input-area">
 
@@ -274,9 +267,14 @@
   </main>
 
 
-  <!-- Connect VYRA Chat JavaScript -->
+  <!-- VYRA AI System -->
+
+  <script src="chat-agent.js"></script>
+
+  <script src="master-core.js"></script>
 
   <script src="app.js"></script>
+
 
 </body>
 
