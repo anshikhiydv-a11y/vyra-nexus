@@ -2,121 +2,81 @@ const input = document.querySelector("input");
 const sendButton = document.querySelector(".send");
 const chat = document.querySelector(".chat");
 
-
 async function sendMessage() {
-
   const userMessage = input.value.trim();
 
-  // खाली message को send मत करो
+  // खाली message भेजने से रोकें
   if (userMessage === "") {
     return;
   }
 
+  // User का message chat में दिखाएँ
+  const userBubble = document.createElement("div");
 
-  // User का message बनाओ
+  userBubble.className = "message user-message";
 
-  const userBubble =
-    document.createElement("div");
-
-  userBubble.className =
-    "message user-message";
-
-  userBubble.textContent =
-    userMessage;
+  userBubble.textContent = userMessage;
 
   chat.appendChild(userBubble);
 
-
-  // Input box खाली करो
-
+  // Input box खाली करें
   input.value = "";
 
-  input.focus();
-
-
-  // VYRA से जवाब लो
+  // Chat को नीचे ले जाएँ
+  chat.scrollTo({
+    top: chat.scrollHeight,
+    behavior: "smooth"
+  });
 
   try {
-
+    // Master Core से जवाब लें
     const vyraReply =
-      await VYRA.processMessage(
-        userMessage
-      );
+      await VYRA.processMessage(userMessage);
 
-
-    // VYRA का message बनाओ
-
+    // VYRA का जवाब chat में दिखाएँ
     const vyraBubble =
       document.createElement("div");
 
-    vyraBubble.className =
-      "message";
+    vyraBubble.className = "message";
 
-    vyraBubble.textContent =
-      vyraReply;
+    vyraBubble.textContent = vyraReply;
 
     chat.appendChild(vyraBubble);
 
-
   } catch (error) {
+    console.error("VYRA Error:", error);
 
-    console.error(error);
-
-
-    // अगर system में error आए
-
+    // Error होने पर यह message दिखेगा
     const errorBubble =
       document.createElement("div");
 
-    errorBubble.className =
-      "message";
+    errorBubble.className = "message";
 
     errorBubble.textContent =
-      "VYRA Core से connection में समस्या आई है। कृपया page refresh करके फिर कोशिश करें।";
+      "VYRA Core में एक समस्या आई है। कृपया page refresh करके फिर कोशिश करें।";
 
     chat.appendChild(errorBubble);
-
   }
 
-
-  // Chat को नीचे scroll करो
-
+  // नए reply के बाद नीचे जाएँ
   chat.scrollTo({
-
     top: chat.scrollHeight,
-
     behavior: "smooth"
-
   });
-
 }
 
-
-// Send button दबाने पर
-
+// Send button
 sendButton.addEventListener(
-
   "click",
-
   sendMessage
-
 );
 
-
-// Enter दबाने पर
-
+// Enter दबाने पर message भेजें
 input.addEventListener(
-
   "keydown",
-
   function (event) {
-
     if (event.key === "Enter") {
-
       sendMessage();
-
     }
-
   }
-
 );
