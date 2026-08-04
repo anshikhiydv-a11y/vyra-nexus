@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -21,171 +21,465 @@
 
     body {
       min-height: 100vh;
-      background: #0b1020;
+      background:
+        radial-gradient(
+          circle at center,
+          #17103b,
+          #050711 70%
+        );
+
       color: white;
-      font-family: Arial, sans-serif;
+
+      font-family:
+        Arial,
+        sans-serif;
     }
 
-    .app {
+    .dashboard {
+
       width: 100%;
-      max-width: 700px;
-      min-height: 100vh;
+
+      max-width: 1100px;
 
       margin: auto;
 
-      display: flex;
-      flex-direction: column;
+      padding: 22px;
 
-      padding: 18px;
     }
 
-    /* Header */
+    /* TOP */
 
-    header {
+    .top {
+
       display: flex;
-      justify-content: space-between;
-      align-items: center;
 
-      padding: 12px 4px 20px;
+      justify-content:
+        space-between;
 
-      border-bottom: 1px solid #27304a;
+      align-items:
+        center;
+
+      gap: 15px;
+
     }
 
     .logo {
-      font-size: 24px;
+
+      font-size: 42px;
+
       font-weight: bold;
-      letter-spacing: 2px;
+
+      letter-spacing: 5px;
+
+      background:
+        linear-gradient(
+          90deg,
+          #7d65ff,
+          #42c8ff
+        );
+
+      -webkit-background-clip:
+        text;
+
+      color:
+        transparent;
+
     }
 
-    .status {
-      color: #65e6a6;
-      font-size: 13px;
-      white-space: nowrap;
+    .online {
+
+      color:
+        #54e6bd;
+
+      font-size:
+        14px;
+
     }
 
-    /* Chat Area */
+    /* GREETING */
 
-    .chat {
-      flex: 1;
+    .greeting {
 
-      display: flex;
-      flex-direction: column;
+      margin-top:
+        20px;
 
-      gap: 14px;
+      padding:
+        22px;
 
-      padding: 25px 0;
+      border:
+        1px solid
+        #4b3d87;
 
-      overflow-y: auto;
+      border-radius:
+        22px;
+
+      background:
+        rgba(
+          18,
+          15,
+          43,
+          0.8
+        );
+
     }
 
-    .message {
-      background: #18213a;
+    .greeting h2 {
 
-      padding: 16px;
+      font-size:
+        25px;
 
-      border-radius: 16px;
+      margin-bottom:
+        10px;
 
-      max-width: 85%;
-
-      line-height: 1.5;
-
-      word-wrap: break-word;
     }
 
-    /* User Message */
+    .greeting p {
 
-    .user-message {
-      background: #6d7cff;
+      color:
+        #c6c3dc;
 
-      align-self: flex-end;
-
-      text-align: left;
     }
 
-    /* Input Area */
+    /* MAIN */
 
-    .input-area {
-      display: flex;
+    .main {
 
-      align-items: center;
+      display:
+        grid;
 
-      gap: 8px;
+      grid-template-columns:
+        1fr
+        1.5fr
+        1fr;
 
-      padding-top: 15px;
+      gap:
+        18px;
 
-      padding-bottom: 10px;
+      margin-top:
+        20px;
 
-      border-top: 1px solid #27304a;
-
-      background: #0b1020;
     }
 
-    input {
-      flex: 1;
+    /* CARD */
 
-      min-width: 0;
+    .card {
 
-      border: none;
+      padding:
+        20px;
 
-      outline: none;
+      border:
+        1px solid
+        #40346e;
 
-      padding: 15px;
+      border-radius:
+        22px;
 
-      border-radius: 14px;
+      background:
+        rgba(
+          13,
+          12,
+          32,
+          0.85
+        );
 
-      font-size: 16px;
+      box-shadow:
+        0 0 25px
+        rgba(
+          117,
+          75,
+          255,
+          0.12
+        );
 
-      background: #18213a;
-
-      color: white;
     }
 
-    input::placeholder {
-      color: #9ba5c0;
+    /* TAP */
+
+    .voice-circle {
+
+      width:
+        150px;
+
+      height:
+        150px;
+
+      margin:
+        15px auto;
+
+      border-radius:
+        50%;
+
+      display:
+        flex;
+
+      justify-content:
+        center;
+
+      align-items:
+        center;
+
+      font-size:
+        55px;
+
+      border:
+        5px solid
+        #8b61ff;
+
+      box-shadow:
+        0 0 25px
+        #6846e6;
+
     }
 
-    button {
-      border: none;
+    .tap-text {
 
-      border-radius: 14px;
+      text-align:
+        center;
 
-      padding: 14px;
+      font-weight:
+        bold;
 
-      font-size: 18px;
+      letter-spacing:
+        1px;
 
-      cursor: pointer;
     }
 
-    .send {
-      background: #6d7cff;
+    /* AVATAR */
 
-      color: white;
+    .avatar {
+
+      min-height:
+        510px;
+
+      display:
+        flex;
+
+      justify-content:
+        center;
+
+      align-items:
+        center;
+
+      border-radius:
+        30px;
+
+      border:
+        1px solid
+        #4b3d87;
+
+      background:
+        radial-gradient(
+          circle,
+          #251950,
+          #080a18 70%
+        );
+
+      font-size:
+        25px;
+
+      color:
+        #9f91ff;
+
+    }
+
+    /* OVERVIEW */
+
+    .overview-item {
+
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      padding:
+        16px 0;
+
+      border-bottom:
+        1px solid
+        #30274e;
+
+    }
+
+    /* MEMORY */
+
+    .memory {
+
+      margin-top:
+        18px;
+
+    }
+
+    .progress {
+
+      width:
+        100%;
+
+      height:
+        8px;
+
+      margin-top:
+        14px;
+
+      border-radius:
+        10px;
+
+      background:
+        #24213b;
+
+    }
+
+    .progress-fill {
+
+      width:
+        82%;
+
+      height:
+        100%;
+
+      border-radius:
+        10px;
+
+      background:
+        linear-gradient(
+          90deg,
+          #8d5cff,
+          #c06cff
+        );
+
+    }
+
+    /* COMMAND */
+
+    .command {
+
+      display:
+        flex;
+
+      gap:
+        12px;
+
+      margin-top:
+        20px;
+
+      padding:
+        12px;
+
+      border:
+        1px solid
+        #6847c9;
+
+      border-radius:
+        25px;
+
+      background:
+        #111127;
+
+    }
+
+    .command input {
+
+      flex:
+        1;
+
+      border:
+        none;
+
+      outline:
+        none;
+
+      background:
+        transparent;
+
+      color:
+        white;
+
+      font-size:
+        17px;
+
+      padding:
+        12px;
+
     }
 
     .mic {
-      background: #27304a;
 
-      color: white;
+      width:
+        52px;
+
+      height:
+        52px;
+
+      border:
+        none;
+
+      border-radius:
+        50%;
+
+      font-size:
+        22px;
+
+      background:
+        #6846e6;
+
+      color:
+        white;
+
     }
 
-    /* Small Phone Screens */
+    /* NAV */
 
-    @media (max-width: 450px) {
+    .nav {
 
-      .app {
-        padding: 14px;
+      display:
+        flex;
+
+      justify-content:
+        space-around;
+
+      margin-top:
+        18px;
+
+      padding:
+        18px;
+
+      border:
+        1px solid
+        #3d3267;
+
+      border-radius:
+        25px;
+
+      background:
+        #0d0d20;
+
+    }
+
+    /* MOBILE */
+
+    @media (
+      max-width: 800px
+    ) {
+
+      .main {
+
+        grid-template-columns:
+          1fr;
+
+      }
+
+      .avatar {
+
+        min-height:
+          420px;
+
       }
 
       .logo {
-        font-size: 21px;
-      }
 
-      .status {
-        font-size: 11px;
-      }
+        font-size:
+          32px;
 
-      .message {
-        max-width: 90%;
       }
 
     }
@@ -197,85 +491,73 @@
 
 <body>
 
-  <main class="app">
+  <main class="dashboard">
 
-    <!-- Header -->
+    <!-- TOP -->
 
-    <header>
+    <section class="top">
 
-      <div class="logo">
-        VYRA NEXUS
+      <div>
+
+        <div class="logo">
+
+          VYRA
+
+        </div>
+
+        <small>
+
+          YOUR VOICE.
+          MY COMMAND.
+
+        </small>
+
       </div>
 
-      <div class="status">
-        ● SYSTEM ONLINE
-      </div>
+      <div class="online">
 
-    </header>
-
-
-    <!-- Chat Area -->
-
-    <section class="chat">
-
-      <div class="message">
-
-        Hello, Boss 👋
-
-        <br><br>
-
-        मैं VYRA Nexus हूँ।
-
-        <br>
-
-        मेरा Master AI Core
-        और Chat Agent online हैं।
+        ● ONLINE
 
       </div>
 
     </section>
 
 
-    <!-- Input Area -->
+    <!-- GREETING -->
 
-    <section class="input-area">
+    <section class="greeting">
 
-      <input
-        type="text"
-        placeholder="VYRA से कुछ पूछें..."
-        aria-label="VYRA message"
-      >
+      <h2>
 
-      <button
-        class="mic"
-        type="button"
-        aria-label="Voice input"
-      >
-        🎤
-      </button>
+        Good Evening,
+        Boss 💜
 
-      <button
-        class="send"
-        type="button"
-        aria-label="Send message"
-      >
-        ➤
-      </button>
+      </h2>
+
+      <p>
+
+        I'm VYRA.
+        How can I assist
+        you today?
+
+      </p>
 
     </section>
 
-  </main>
+
+    <!-- MAIN -->
+
+    <section class="main">
 
 
-  <!-- VYRA AI System -->
+      <!-- LEFT -->
 
-  <script src="chat-agent.js"></script>
+      <div>
 
-  <script src="master-core.js"></script>
+        <div class="card">
 
-  <script src="app.js"></script>
+          <div
+            class="voice-circle"
+          >
 
-
-</body>
-
-  </html>
+            🎙️
