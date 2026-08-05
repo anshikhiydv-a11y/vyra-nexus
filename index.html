@@ -484,6 +484,33 @@
 
     }
 
+@media (max-width: 800px) {
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .main > div {
+    width: 100%;
+  }
+
+  .avatar {
+    min-height: 420px;
+    width: 100%;
+    order: 1;
+  }
+
+  .main > div:first-child {
+    order: 2;
+  }
+
+  .main > div:last-child {
+    order: 3;
+  }
+
+      }
   </style>
 
 </head>
