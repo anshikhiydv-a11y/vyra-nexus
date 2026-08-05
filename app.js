@@ -1,201 +1,201 @@
-// ==============================
-// VYRA NEXUS - APP CONTROLLER
-// ==============================
+// ==================================
+// VYRA NEXUS - COMMAND SYSTEM
+// ==================================
 
-const commandInput = document.querySelector(
-  '.command input'
-);
+document.addEventListener("DOMContentLoaded", function () {
 
-const sendButton = document.querySelector(
-  '.command button'
-);
+  // Command input ढूँढो
+  const input = document.querySelector(
+    ".command input"
+  );
 
-const greeting = document.querySelector(
-  '.greeting p'
-);
+  // Command section का button ढूँढो
+  const sendButton = document.querySelector(
+    ".command button"
+  );
 
-
-// VYRA का जवाब दिखाने वाला function
-
-function showVyraReply(reply) {
-
-  greeting.innerHTML = reply;
-
-}
+  // VYRA का message area
+  const messageBox = document.querySelector(
+    ".greeting p"
+  );
 
 
-// User का message process करना
+  // अगर कोई element नहीं मिला
+  if (!input || !sendButton || !messageBox) {
 
-function processCommand() {
-
-  const message =
-    commandInput.value.trim();
-
-  if (message === '') {
+    console.log(
+      "VYRA: Required UI element not found."
+    );
 
     return;
 
   }
 
 
-  const text =
-    message.toLowerCase();
+  // VYRA reply function
+
+  function sendCommand() {
+
+    const userMessage =
+      input.value.trim();
 
 
-  // User का message दिखाओ
+    // खाली message मत भेजो
 
-  greeting.innerHTML =
+    if (userMessage === "") {
 
-    '<b>Boss:</b> ' +
+      messageBox.innerHTML =
+        "Boss, पहले कोई command लिखो 💜";
 
-    message +
-
-    '<br><br>' +
-
-    '<b>VYRA:</b> Thinking...';
-
-
-  // थोड़ी देर बाद जवाब
-
-  setTimeout(() => {
-
-    let reply;
-
-
-    if (
-
-      text.includes('तुम कौन हो') ||
-
-      text.includes('who are you')
-
-    ) {
-
-      reply =
-
-        'मैं VYRA हूँ, Boss 💜<br>' +
-
-        'मैं तुम्हारे AI ecosystem की ' +
-
-        'Master AI हूँ।';
+      return;
 
     }
 
 
-    else if (
-
-      text.includes('hello') ||
-
-      text.includes('हेलो') ||
-
-      text.includes('hi') ||
-
-      text.includes('हाय')
-
-    ) {
-
-      reply =
-
-        'Hello, Boss 👋<br>' +
-
-        'मैं online हूँ। ' +
-
-        'मैं आपकी कैसे मदद कर सकती हूँ?';
-
-    }
+    const text =
+      userMessage.toLowerCase();
 
 
-    else if (
+    // User message दिखाओ
 
-      text.includes('कैसे हो') ||
+    messageBox.innerHTML =
 
-      text.includes('how are you')
+      "<b>Boss:</b> " +
 
-    ) {
+      userMessage +
 
-      reply =
+      "<br><br>" +
 
-        'मैं पूरी तरह online हूँ, Boss 💜<br>' +
-
-        'VYRA Nexus के systems ' +
-
-        'सही तरीके से काम कर रहे हैं।';
-
-    }
-
-
-    else if (
-
-      text.includes('नाम') ||
-
-      text.includes('name')
-
-    ) {
-
-      reply =
-
-        'मेरा नाम VYRA है, Boss 💜<br>' +
-
-        'VYRA का मतलब है: ' +
-
-        'Your Voice. My Command.';
-
-    }
-
-
-    else {
-
-      reply =
-
-        'मैंने आपका command receive कर लिया है, Boss. 💜<br><br>' +
-
-        'अभी मेरा Advanced Chat AI ' +
-
-        'connect किया जा रहा है।';
-
-    }
-
-
-    showVyraReply(reply);
+      "<b>VYRA:</b> Processing...";
 
 
     // Input खाली करो
 
-    commandInput.value = '';
-
-  }, 700);
-
-}
+    input.value = "";
 
 
-// Send button दबाने पर
+    // VYRA reply
 
-sendButton.addEventListener(
+    setTimeout(function () {
 
-  'click',
-
-  processCommand
-
-);
+      let reply;
 
 
-// Enter दबाने पर
+      if (
 
-commandInput.addEventListener(
+        text.includes("तुम कौन हो") ||
 
-  'keydown',
+        text.includes("who are you")
 
-  function(event) {
+      ) {
 
-    if (
+        reply =
 
-      event.key === 'Enter'
+          "मैं VYRA हूँ, Boss 💜<br>" +
 
-    ) {
+          "मैं तुम्हारे AI Ecosystem की " +
 
-      processCommand();
+          "Master AI हूँ।";
 
-    }
+      }
+
+
+      else if (
+
+        text.includes("hello") ||
+
+        text.includes("hi") ||
+
+        text.includes("हेलो") ||
+
+        text.includes("हाय")
+
+      ) {
+
+        reply =
+
+          "Hello, Boss 👋<br>" +
+
+          "मैं online हूँ। " +
+
+          "मैं आपकी कैसे मदद कर सकती हूँ?";
+
+      }
+
+
+      else if (
+
+        text.includes("कैसे हो") ||
+
+        text.includes("how are you")
+
+      ) {
+
+        reply =
+
+          "मैं पूरी तरह online हूँ, Boss 💜<br>" +
+
+          "मेरे सभी मुख्य systems " +
+
+          "सही तरीके से चल रहे हैं।";
+
+      }
+
+
+      else {
+
+        reply =
+
+          "मैंने आपका संदेश प्राप्त कर लिया है, Boss 💜<br><br>" +
+
+          "अभी मेरा Advanced Chat Agent " +
+
+          "तैयार किया जा रहा है।";
+
+      }
+
+
+      messageBox.innerHTML =
+
+        "<b>VYRA:</b><br>" +
+
+        reply;
+
+
+    }, 700);
 
   }
 
-);
+
+  // Button click
+
+  sendButton.addEventListener(
+
+    "click",
+
+    sendCommand
+
+  );
+
+
+  // Enter key
+
+  input.addEventListener(
+
+    "keydown",
+
+    function (event) {
+
+      if (event.key === "Enter") {
+
+        event.preventDefault();
+
+        sendCommand();
+
+      }
+
+    }
+
+  );
+
+});
