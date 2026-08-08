@@ -1,201 +1,368 @@
-// ==================================
-// VYRA NEXUS - COMMAND SYSTEM
-// ==================================
+/* =========================================
+   VYRA NEXUS — APP CONTROLLER
+   Master Core Connected
+========================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  // Command input ढूँढो
+  "use strict";
+
+
+  // =========================================
+  // UI ELEMENTS
+  // =========================================
+
   const input = document.querySelector(
     ".command input"
   );
 
-  // Command section का button ढूँढो
   const sendButton = document.querySelector(
-    ".command button"
+    ".send"
   );
 
-  // VYRA का message area
   const messageBox = document.querySelector(
     ".greeting p"
   );
 
 
-  // अगर कोई element नहीं मिला
+  // =========================================
+  // SYSTEM CHECK
+  // =========================================
+
   if (!input || !sendButton || !messageBox) {
 
-    console.log(
-      "VYRA: Required UI element not found."
+    console.error(
+      "VYRA: Required UI elements not found."
     );
 
     return;
+  }
+
+
+  if (!window.VYRA_MASTER) {
+
+    console.error(
+      "VYRA: Master Core not found."
+    );
+
+    messageBox.innerHTML =
+      "Boss, मेरा Master Core अभी connect नहीं हुआ है।";
+
+    return;
+  }
+
+
+  // =========================================
+  // DISPLAY RESPONSE
+  // =========================================
+
+  function displayResponse(response) {
+
+    messageBox.innerHTML =
+      "<b>VYRA:</b><br><br>" +
+      response;
 
   }
 
 
-  // VYRA reply function
+  // =========================================
+  // CHAT AGENT
+  // =========================================
 
-  function sendCommand() {
+  function runChatAgent(message) {
 
-    const userMessage =
+    const text =
+      message.toLowerCase();
+
+
+    if (
+      text.includes("तुम कौन हो") ||
+      text.includes("who are you")
+    ) {
+
+      return (
+        "मैं VYRA हूँ, Boss 💜<br>" +
+        "मैं तुम्हारे AI Ecosystem की " +
+        "Master AI हूँ।"
+      );
+
+    }
+
+
+    if (
+      text.includes("hello") ||
+      text.includes("hi") ||
+      text.includes("हेलो") ||
+      text.includes("हाय")
+    ) {
+
+      return (
+        "Hello, Boss 👋<br>" +
+        "मैं online हूँ। " +
+        "मैं आपकी कैसे मदद कर सकती हूँ?"
+      );
+
+    }
+
+
+    if (
+      text.includes("कैसे हो") ||
+      text.includes("how are you")
+    ) {
+
+      return (
+        "मैं पूरी तरह online हूँ, Boss 💜<br>" +
+        "मेरे मुख्य systems अभी सही तरीके से चल रहे हैं।"
+      );
+
+    }
+
+
+    if (
+      text.includes("नाम") ||
+      text.includes("name")
+    ) {
+
+      return (
+        "मेरा नाम VYRA है, Boss 💜"
+      );
+
+    }
+
+
+    return (
+      "मैंने आपका message समझ लिया है, Boss 💜<br><br>" +
+      "Chat Agent अभी basic mode में चल रहा है।"
+    );
+
+  }
+
+
+  // =========================================
+  // AGENT ROUTER
+  // =========================================
+
+  function executeAgent(message, routing) {
+
+    switch (routing.agentId) {
+
+
+      // -------------------------------------
+      // CHAT
+      // -------------------------------------
+
+      case "chat":
+
+        return runChatAgent(message);
+
+
+      // -------------------------------------
+      // FUTURE AGENTS
+      // -------------------------------------
+
+      case "study":
+
+        return (
+          "Study Agent अभी तैयार किया जा रहा है, Boss 📚"
+        );
+
+
+      case "story":
+
+        return (
+          "Story Agent अभी तैयार किया जा रहा है, Boss 📖"
+        );
+
+
+      case "image":
+
+        return (
+          "Image Agent अभी तैयार किया जा रहा है, Boss 🖼️"
+        );
+
+
+      case "video":
+
+        return (
+          "Video Agent अभी तैयार किया जा रहा है, Boss 🎬"
+        );
+
+
+      case "voice":
+
+        return (
+          "Voice Agent अभी तैयार किया जा रहा है, Boss 🎙️"
+        );
+
+
+      case "sound":
+
+        return (
+          "Sound Agent अभी तैयार किया जा रहा है, Boss 🔊"
+        );
+
+
+      case "editing":
+
+        return (
+          "Editing Agent अभी तैयार किया जा रहा है, Boss ✂️"
+        );
+
+
+      case "coding":
+
+        return (
+          "Coding Agent अभी तैयार किया जा रहा है, Boss 💻"
+        );
+
+
+      case "presentation":
+
+        return (
+          "Presentation Agent अभी तैयार किया जा रहा है, Boss 📊"
+        );
+
+
+      case "task":
+
+        return (
+          "Task Agent अभी तैयार किया जा रहा है, Boss ⚙️"
+        );
+
+
+      case "memory":
+
+        return (
+          "Memory Agent अभी तैयार किया जा रहा है, Boss 🧠"
+        );
+
+
+      default:
+
+        return runChatAgent(message);
+
+    }
+
+  }
+
+
+  // =========================================
+  // MAIN COMMAND PROCESSOR
+  // =========================================
+
+  function processCommand() {
+
+    const message =
       input.value.trim();
 
 
-    // खाली message मत भेजो
-
-    if (userMessage === "") {
+    if (!message) {
 
       messageBox.innerHTML =
-        "Boss, पहले कोई command लिखो 💜";
+        "Boss, कोई command लिखो या बोलो 💜";
 
       return;
 
     }
 
 
-    const text =
-      userMessage.toLowerCase();
-
-
-    // User message दिखाओ
+    // ---------------------------------------
+    // USER MESSAGE
+    // ---------------------------------------
 
     messageBox.innerHTML =
-
-      "<b>Boss:</b> " +
-
-      userMessage +
-
+      "<b>Boss:</b><br>" +
+      message +
       "<br><br>" +
+      "<b>VYRA:</b><br>" +
+      "Thinking...";
 
-      "<b>VYRA:</b> Processing...";
-
-
-    // Input खाली करो
 
     input.value = "";
 
 
-    // VYRA reply
+    // ---------------------------------------
+    // MASTER CORE
+    // ---------------------------------------
 
     setTimeout(function () {
 
-      let reply;
+      const routing =
+        window.VYRA_MASTER.process(message);
 
 
-      if (
-
-        text.includes("तुम कौन हो") ||
-
-        text.includes("who are you")
-
-      ) {
-
-        reply =
-
-          "मैं VYRA हूँ, Boss 💜<br>" +
-
-          "मैं तुम्हारे AI Ecosystem की " +
-
-          "Master AI हूँ।";
-
-      }
+      console.log(
+        "VYRA ROUTER:",
+        routing
+      );
 
 
-      else if (
+      // -------------------------------------
+      // AGENT EXECUTION
+      // -------------------------------------
 
-        text.includes("hello") ||
-
-        text.includes("hi") ||
-
-        text.includes("हेलो") ||
-
-        text.includes("हाय")
-
-      ) {
-
-        reply =
-
-          "Hello, Boss 👋<br>" +
-
-          "मैं online हूँ। " +
-
-          "मैं आपकी कैसे मदद कर सकती हूँ?";
-
-      }
+      const response =
+        executeAgent(
+          message,
+          routing
+        );
 
 
-      else if (
+      // -------------------------------------
+      // RESPONSE
+      // -------------------------------------
 
-        text.includes("कैसे हो") ||
-
-        text.includes("how are you")
-
-      ) {
-
-        reply =
-
-          "मैं पूरी तरह online हूँ, Boss 💜<br>" +
-
-          "मेरे सभी मुख्य systems " +
-
-          "सही तरीके से चल रहे हैं।";
-
-      }
+      displayResponse(response);
 
 
-      else {
-
-        reply =
-
-          "मैंने आपका संदेश प्राप्त कर लिया है, Boss 💜<br><br>" +
-
-          "अभी मेरा Advanced Chat Agent " +
-
-          "तैयार किया जा रहा है।";
-
-      }
-
-
-      messageBox.innerHTML =
-
-        "<b>VYRA:</b><br>" +
-
-        reply;
-
-
-    }, 700);
+    }, 500);
 
   }
 
 
-  // Button click
+  // =========================================
+  // SEND BUTTON
+  // =========================================
 
   sendButton.addEventListener(
-
     "click",
-
-    sendCommand
-
+    processCommand
   );
 
 
-  // Enter key
+  // =========================================
+  // ENTER KEY
+  // =========================================
 
   input.addEventListener(
-
     "keydown",
-
     function (event) {
 
       if (event.key === "Enter") {
 
         event.preventDefault();
 
-        sendCommand();
+        processCommand();
 
       }
 
     }
+  );
 
+
+  // =========================================
+  // STARTUP
+  // =========================================
+
+  console.log(
+    "VYRA APP CONTROLLER: ONLINE"
+  );
+
+  console.log(
+    "Master Core:",
+    window.VYRA_MASTER
+      ? "CONNECTED"
+      : "NOT FOUND"
   );
 
 });
