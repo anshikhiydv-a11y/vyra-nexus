@@ -282,40 +282,93 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ---------------------------------------
-    // MASTER CORE
+    // ========================================
+// MASTER CORE
+// ========================================
+
+setTimeout(async function () {
+
+  try {
+
+    // ---------------------------------------
+    // SEND MESSAGE TO MASTER CORE
     // ---------------------------------------
 
-    setTimeout(function () {
-
-      const routing =
-        window.VYRA_MASTER.process(message);
+    const response =
+      await window.VYRA_MASTER.process(message);
 
 
-      console.log(
-        "VYRA ROUTER:",
-        routing
-      );
+    console.log(
+      "VYRA MASTER RESPONSE:",
+      response
+    );
 
 
-      // -------------------------------------
-      // AGENT EXECUTION
-      // -------------------------------------
+    // ---------------------------------------
+    // DISPLAY RESPONSE
+    // ---------------------------------------
 
-      const response =
-        executeAgent(
-          message,
-          routing
-        );
-
-
-      // -------------------------------------
-      // RESPONSE
-      // -------------------------------------
+    if (typeof response === "string") {
 
       displayResponse(response);
 
+    }
 
-    }, 500);
+
+    else if (
+      response &&
+      typeof response.message === "string"
+    ) {
+
+      displayResponse(
+        response.message
+      );
+
+    }
+
+
+    else if (
+      response &&
+      response.success === true
+    ) {
+
+      displayResponse(
+        "Boss 💜 आपका message समझ लिया गया है।"
+      );
+
+    }
+
+
+    else {
+
+      displayResponse(
+        "Boss 💜 आपका command Master Core तक पहुँच गया है।"
+      );
+
+    }
+
+  }
+
+
+  // ---------------------------------------
+  // ERROR HANDLING
+  // ---------------------------------------
+
+  catch (error) {
+
+    console.error(
+      "VYRA MASTER ERROR:",
+      error
+    );
+
+
+    displayResponse(
+      "Boss 💜 अभी VYRA में एक छोटी technical problem आई है।"
+    );
+
+  }
+
+});
 
   }
 
