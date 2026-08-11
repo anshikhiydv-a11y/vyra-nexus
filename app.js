@@ -286,89 +286,65 @@ document.addEventListener("DOMContentLoaded", function () {
 // MASTER CORE
 // ========================================
 
+// ========================================
+// GEMINI BACKEND
+// ========================================
+
 setTimeout(async function () {
 
   try {
 
-    // ---------------------------------------
-    // SEND MESSAGE TO MASTER CORE
-    // ---------------------------------------
+    const response = await fetch("/api/chat", {
+      method: "POST",
 
-    const response =
-      await window.VYRA_MASTER.process(message);
+      headers: {
+        "Content-Type": "application/json"
+      },
 
+      body: JSON.stringify({
+        message: message
+      })
+    });
+
+    const data = await response.json();
 
     console.log(
-      "VYRA MASTER RESPONSE:",
-      response
+      "VYRA BACKEND RESPONSE:",
+      data
     );
 
-
-    // ---------------------------------------
-    // DISPLAY RESPONSE
-    // ---------------------------------------
-
-    if (typeof response === "string") {
-
-      displayResponse(response);
-
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Backend request failed"
+      );
     }
 
+    if (data.reply) {
 
-    else if (
-      response &&
-      typeof response.message === "string"
-    ) {
+      displayResponse(data.reply);
+
+    } else {
 
       displayResponse(
-        response.message
+        "Boss 💜 Gemini ने कोई response नहीं दिया।"
       );
 
     }
 
-
-    else if (
-      response &&
-      response.success === true
-    ) {
-
-      displayResponse(
-        "Boss 💜 आपका message समझ लिया गया है।"
-      );
-
-    }
-
-
-    else {
-
-      displayResponse(
-        "Boss 💜 आपका command Master Core तक पहुँच गया है।"
-      );
-
-    }
-
-  }
-
-
-  // ---------------------------------------
-  // ERROR HANDLING
-  // ---------------------------------------
-
-  catch (error) {
+  } catch (error) {
 
     console.error(
-      "VYRA MASTER ERROR:",
+      "VYRA BACKEND ERROR:",
       error
     );
 
-
     displayResponse(
-      "Boss 💜 अभी VYRA में एक छोटी technical problem आई है।"
+      "Boss 💜 Backend से connection नहीं हो पाया।"
     );
 
   }
 
-});
+}, 300);
 
   }
 
