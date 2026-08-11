@@ -43,7 +43,7 @@
 
     story: {
       name: "Story Agent",
-      status: "planned",
+      status: "active",
       type: "creative"
     },
 
@@ -432,6 +432,20 @@
 
     }
 
+     // ---------------------------------------
+// STORY AGENT
+// ---------------------------------------
+
+if (
+  routing.agentId === "story" &&
+  window.StoryAgent
+) {
+
+  return await window.StoryAgent.handle(
+    message
+  );
+
+}
 
     // ---------------------------------------
     // CHAT AGENT
@@ -522,13 +536,17 @@
 
       case "language":
 
-        return !!window.LanguageAgent;
+  return !!window.LanguageAgent;
 
 
-      default:
+case "story":
 
-        return false;
+  return !!window.StoryAgent;
 
+
+default:
+
+  return false;
     }
 
   }
