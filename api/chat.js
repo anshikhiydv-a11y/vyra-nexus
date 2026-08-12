@@ -4,8 +4,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message, history = [] } = req.body || {};
-
+    const {
+  message,
+  history = [],
+  systemInstruction
+} = req.body || {};
     if (!message) {
       return res.status(400).json({ error: "Message is required" });
     }
@@ -28,14 +31,18 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           systemInstruction: {
-            parts: [
-              {
-                text: `You are VYRA, an intelligent personal AI assistant.
+  parts: [
+    {
+      text:
+        systemInstruction ||
+        `You are VYRA, an intelligent personal AI assistant.
 Address the user as "Boss".
 Be helpful, concise, natural and friendly.
 You can communicate in Hindi, English or Hinglish depending on the user's language.
 Do not mention internal API details unless asked.`
-              }
+    }
+  ]
+},
             ]
           },
           contents
