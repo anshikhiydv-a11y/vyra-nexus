@@ -269,12 +269,14 @@ property of the Scene Breakdown Agent.
           body: JSON.stringify({
 
             message:
-              SCENE_SYSTEM_PROMPT +
-              styleInstruction +
-              "\n\nSTORY TO BREAK DOWN:\n" +
-              story,
+  "STORY TO BREAK DOWN:\n" +
+  story,
 
-            history: []
+systemInstruction:
+  SCENE_SYSTEM_PROMPT +
+  styleInstruction,
+
+history: []
 
           })
 
