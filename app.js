@@ -281,52 +281,41 @@ document.addEventListener("DOMContentLoaded", function () {
     input.value = "";
 
 
-    // ---------------------------------------
     // ========================================
 // MASTER CORE
-// ========================================
-
-// ========================================
-// GEMINI BACKEND
 // ========================================
 
 setTimeout(async function () {
 
   try {
 
-    const response = await fetch("/api/chat", {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
-        message: message
-      })
-    });
-
-    const data = await response.json();
+    const routing =
+      window.VYRA_MASTER.route(message);
 
     console.log(
-      "VYRA BACKEND RESPONSE:",
-      data
+      "VYRA ROUTING:",
+      routing
     );
 
-    if (!response.ok) {
-      throw new Error(
-        data.error || "Backend request failed"
+    const result =
+      await window.VYRA_MASTER.process(message);
+
+    if (result?.message) {
+
+      displayResponse(
+        result.message
       );
-    }
 
-    if (data.reply) {
+    } else if (result?.reply) {
 
-      displayResponse(data.reply);
+      displayResponse(
+        result.reply
+      );
 
     } else {
 
       displayResponse(
-        "Boss 💜 Gemini ने कोई response नहीं दिया।"
+        "Boss 💜 कोई response नहीं मिला।"
       );
 
     }
@@ -334,18 +323,17 @@ setTimeout(async function () {
   } catch (error) {
 
     console.error(
-      "VYRA BACKEND ERROR:",
+      "VYRA MASTER ERROR:",
       error
     );
 
     displayResponse(
-      "Boss 💜 Backend से connection नहीं हो पाया।"
+      "Boss 💜 VYRA Master Core से connection नहीं हो पाया।"
     );
 
   }
 
 }, 300);
-
   }
 
 
