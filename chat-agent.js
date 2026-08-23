@@ -76,8 +76,7 @@ try {
   return {
     success: false,
     reply:
-      "Boss 💜 REAL ERROR: " +
-      (error?.message || String(error))
+  "🔥 NEW CHAT AGENT LOADED 🔥"
   };
 
     }
