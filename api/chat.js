@@ -1,23 +1,34 @@
 export default async function handler(req, res) {
+
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
   }
 
   try {
+
     const {
-  message,
-  history = [],
-  systemInstruction
-} = req.body || {};
+      message,
+      history = [],
+      systemInstruction
+    } = req.body || {};
+
     if (!message) {
-      return res.status(400).json({ error: "Message is required" });
+      return res.status(400).json({
+        error: "Message is required"
+      });
     }
 
     const contents = [
       ...history,
       {
         role: "user",
-        parts: [{ text: message }]
+        parts: [
+          {
+            text: message
+          }
+        ]
       }
     ];
 
@@ -25,38 +36,54 @@ export default async function handler(req, res) {
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
           "x-goog-api-key": process.env.GEMINI_API_KEY
         },
+
         body: JSON.stringify({
+
           systemInstruction: {
-  parts: [
-    {
-      text:
-        systemInstruction ||
-        `You are VYRA, an intelligent personal AI assistant.
+            parts: [
+              {
+                text:
+                  systemInstruction ||
+                  `You are VYRA, an intelligent personal AI assistant.
 Address the user as "Boss".
 Be helpful, concise, natural and friendly.
 You can communicate in Hindi, English or Hinglish depending on the user's language.
 Do not mention internal API details unless asked.`
-    }
-  ]
-},
+              }
             ]
           },
-          contents
+
+          contents: contents
+
         })
       }
     );
 
     const data = await response.json();
 
+    console.log(
+      "VYRA GEMINI RESPONSE:",
+      data
+    );
+
     if (!response.ok) {
-      console.error("Gemini API error:", data);
+
+      console.error(
+        "Gemini API error:",
+        data
+      );
+
       return res.status(response.status).json({
-        error: data?.error?.message || "Gemini API request failed"
+        error:
+          data?.error?.message ||
+          "Gemini API request failed"
       });
+
     }
 
     const reply =
@@ -68,10 +95,18 @@ Do not mention internal API details unless asked.`
     });
 
   } catch (error) {
-    console.error("Server error:", error);
+
+    console.error(
+      "VYRA BACKEND ERROR:",
+      error
+    );
 
     return res.status(500).json({
-      error: "Internal server error"
+      error:
+        error?.message ||
+        "Internal server error"
     });
+
   }
-            }
+
+    }
