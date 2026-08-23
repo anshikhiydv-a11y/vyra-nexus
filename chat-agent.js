@@ -162,3 +162,8 @@ const ChatAgent = {
   }
 
 };
+window.ChatAgent = ChatAgent;
+
+console.log(
+  "VYRA CHAT AGENT: CONNECTED"
+);
