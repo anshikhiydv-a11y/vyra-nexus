@@ -34,8 +34,17 @@ const ChatAgent = {
 
       });
 
-      const data = await response.json();
+      const raw = await response.text();
 
+let data;
+
+try {
+  data = JSON.parse(raw);
+} catch {
+  data = {
+    error: raw || "Empty response"
+  };
+    }
       console.log(
         "VYRA CHAT AGENT → Backend response:",
         data
@@ -59,16 +68,17 @@ const ChatAgent = {
 
     } catch (error) {
 
-      console.error(
-        "VYRA CHAT AGENT ERROR:",
-        error
-      );
+  console.error(
+    "VYRA CHAT AGENT ERROR:",
+    error
+  );
 
-      return {
-        success: false,
-        reply:
-          "Boss 💜 Backend से connection नहीं हो पाया।"
-      };
+  return {
+    success: false,
+    reply:
+      "Boss 💜 REAL ERROR: " +
+      (error?.message || String(error))
+  };
 
     }
 
