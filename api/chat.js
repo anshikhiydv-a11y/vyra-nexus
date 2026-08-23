@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     ];
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent",
       {
         method: "POST",
 
@@ -87,12 +87,31 @@ Do not mention internal API details unless asked.`
     }
 
     const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Sorry Boss, I couldn't generate a response.";
+  data?.candidates?.[0]?.content?.parts
+    ?.map(part => part?.text || "")
+    .join("")
+    .trim();
 
-    return res.status(200).json({
-      reply
-    });
+if (!reply) {
+
+  console.error(
+    "Gemini returned no text:",
+    JSON.stringify(data, null, 2)
+  );
+
+  return res.status(500).json({
+    error:
+      data?.promptFeedback?.blockReason ||
+      data?.candidates?.[0]?.finishReason ||
+      "Gemini returned no text response.",
+    debug: data
+  });
+
+}
+
+return res.status(200).json({
+  reply: reply
+});
 
   } catch (error) {
 
