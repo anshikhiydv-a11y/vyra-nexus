@@ -20,6 +20,7 @@ const ChatAgent = {
         original
       );
 
+      console.log("🔥 VYRA TEST → ABOUT TO CALL /api/chat");
       const response = await fetch("/api/chat", {
 
         method: "POST",
@@ -33,7 +34,8 @@ const ChatAgent = {
         })
 
       });
-
+console.log("🔥 VYRA TEST → FETCH STARTED");
+      
       const raw = await response.text();
 
 let data;
