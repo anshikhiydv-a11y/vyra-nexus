@@ -68,7 +68,7 @@ try {
           "Boss, backend से कोई response नहीं मिला।"
       };
 
-   catch (error) {
+        } catch (error) {
 
   console.error(
     "VYRA CHAT AGENT ERROR:",
