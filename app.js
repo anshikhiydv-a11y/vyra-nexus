@@ -1,6 +1,7 @@
 /* =========================================
    VYRA NEXUS — APP CONTROLLER
-   Master Core Connected
+   Speech-to-Speech Edition v1.0
+   Master Core + Memory Connected
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -12,27 +13,27 @@ document.addEventListener("DOMContentLoaded", function () {
   // UI ELEMENTS
   // =========================================
 
-  const input = document.querySelector(
-    ".command input"
-  );
+  const input =
+    document.querySelector(".command input");
 
-  const sendButton = document.querySelector(
-    ".send"
-  );
+  const sendButton =
+    document.querySelector(".send");
 
-  const messageBox = document.querySelector(
-    ".greeting p"
-  );
+  const micButton =
+    document.querySelector(".mic");
+
+  const messageBox =
+    document.querySelector(".greeting p");
 
 
   // =========================================
   // SYSTEM CHECK
   // =========================================
 
-  if (!input || !sendButton || !messageBox) {
+  if (!micButton) {
 
     console.error(
-      "VYRA: Required UI elements not found."
+      "VYRA SPEECH → Mic button not found."
     );
 
     return;
@@ -42,344 +43,658 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!window.VYRA_MASTER) {
 
     console.error(
-      "VYRA: Master Core not found."
+      "VYRA → Master Core not found."
     );
 
-    messageBox.innerHTML =
-      "Boss, मेरा Master Core अभी connect नहीं हुआ है।";
+    if (messageBox) {
+      messageBox.textContent =
+        "VYRA system connection error.";
+    }
 
     return;
   }
 
 
-  // =========================================
-  // DISPLAY RESPONSE
-  // =========================================
-
-  function displayResponse(response) {
-
-    messageBox.innerHTML =
-      "<b>VYRA:</b><br><br>" +
-      response;
-
-  }
-
-
-  // =========================================
-  // CHAT AGENT
-  // =========================================
-
-  function runChatAgent(message) {
-
-    const text =
-      message.toLowerCase();
-
-
-    if (
-      text.includes("तुम कौन हो") ||
-      text.includes("who are you")
-    ) {
-
-      return (
-        "मैं VYRA हूँ, Boss 💜<br>" +
-        "मैं तुम्हारे AI Ecosystem की " +
-        "Master AI हूँ।"
-      );
-
-    }
-
-
-    if (
-      text.includes("hello") ||
-      text.includes("hi") ||
-      text.includes("हेलो") ||
-      text.includes("हाय")
-    ) {
-
-      return (
-        "Hello, Boss 👋<br>" +
-        "मैं online हूँ। " +
-        "मैं आपकी कैसे मदद कर सकती हूँ?"
-      );
-
-    }
-
-
-    if (
-      text.includes("कैसे हो") ||
-      text.includes("how are you")
-    ) {
-
-      return (
-        "मैं पूरी तरह online हूँ, Boss 💜<br>" +
-        "मेरे मुख्य systems अभी सही तरीके से चल रहे हैं।"
-      );
-
-    }
-
-
-    if (
-      text.includes("नाम") ||
-      text.includes("name")
-    ) {
-
-      return (
-        "मेरा नाम VYRA है, Boss 💜"
-      );
-
-    }
-
-
-    return (
-      "मैंने आपका message समझ लिया है, Boss 💜<br><br>" +
-      "Chat Agent अभी basic mode में चल रहा है।"
-    );
-
-  }
-
-
-  // =========================================
-  // AGENT ROUTER
-  // =========================================
-
-  function executeAgent(message, routing) {
-
-    switch (routing.agentId) {
-
-
-      // -------------------------------------
-      // CHAT
-      // -------------------------------------
-
-      case "chat":
-
-        return runChatAgent(message);
-
-
-      // -------------------------------------
-      // FUTURE AGENTS
-      // -------------------------------------
-
-      case "study":
-
-        return (
-          "Study Agent अभी तैयार किया जा रहा है, Boss 📚"
-        );
-
-
-      case "story":
-
-        return (
-          "Story Agent अभी तैयार किया जा रहा है, Boss 📖"
-        );
-
-
-      case "image":
-
-        return (
-          "Image Agent अभी तैयार किया जा रहा है, Boss 🖼️"
-        );
-
-
-      case "video":
-
-        return (
-          "Video Agent अभी तैयार किया जा रहा है, Boss 🎬"
-        );
-
-
-      case "voice":
-
-        return (
-          "Voice Agent अभी तैयार किया जा रहा है, Boss 🎙️"
-        );
-
-
-      case "sound":
-
-        return (
-          "Sound Agent अभी तैयार किया जा रहा है, Boss 🔊"
-        );
-
-
-      case "editing":
-
-        return (
-          "Editing Agent अभी तैयार किया जा रहा है, Boss ✂️"
-        );
-
-
-      case "coding":
-
-        return (
-          "Coding Agent अभी तैयार किया जा रहा है, Boss 💻"
-        );
-
-
-      case "presentation":
-
-        return (
-          "Presentation Agent अभी तैयार किया जा रहा है, Boss 📊"
-        );
-
-
-      case "task":
-
-        return (
-          "Task Agent अभी तैयार किया जा रहा है, Boss ⚙️"
-        );
-
-
-      case "memory":
-
-        return (
-          "Memory Agent अभी तैयार किया जा रहा है, Boss 🧠"
-        );
-
-
-      default:
-
-        return runChatAgent(message);
-
-    }
-
-  }
-
-
-  // =========================================
-  // MAIN COMMAND PROCESSOR
-  // =========================================
-
-  function processCommand() {
-
-    const message =
-      input.value.trim();
-
-
-    if (!message) {
-
-      messageBox.innerHTML =
-        "Boss, कोई command लिखो या बोलो 💜";
-
-      return;
-
-    }
-
-
-    // ---------------------------------------
-    // USER MESSAGE
-    // ---------------------------------------
-
-    messageBox.innerHTML =
-      "<b>Boss:</b><br>" +
-      message +
-      "<br><br>" +
-      "<b>VYRA:</b><br>" +
-      "Thinking...";
-
-
-    input.value = "";
-
-
-    // ========================================
-// MASTER CORE
-// ========================================
-
-setTimeout(async function () {
-
-  try {
-
-    const routing =
-      window.VYRA_MASTER.route(message);
-
-    console.log(
-      "VYRA ROUTING:",
-      routing
-    );
-
-    const result =
-      await window.VYRA_MASTER.process(message);
-
-    if (result?.message) {
-
-      displayResponse(
-        result.message
-      );
-
-    } else if (result?.reply) {
-
-      displayResponse(
-        result.reply
-      );
-
-    } else {
-
-      displayResponse(
-        "Boss 💜 कोई response नहीं मिला।"
-      );
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      "VYRA MASTER ERROR:",
-      error
-    );
-
-    displayResponse(
-      "Boss 💜 VYRA Master Core से connection नहीं हो पाया।"
-    );
-
-  }
-
-}, 300);
-  }
-
-
-  // =========================================
-  // SEND BUTTON
-  // =========================================
-
-  sendButton.addEventListener(
-    "click",
-    processCommand
+  console.log(
+    "================================="
+  );
+
+  console.log(
+    "VYRA SPEECH SYSTEM: INITIALIZING"
+  );
+
+  console.log(
+    "Master Core: CONNECTED"
   );
 
 
   // =========================================
-  // ENTER KEY
+  // SPEECH RECOGNITION
   // =========================================
 
-  input.addEventListener(
-    "keydown",
-    function (event) {
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
 
-      if (event.key === "Enter") {
 
-        event.preventDefault();
+  if (!SpeechRecognition) {
 
-        processCommand();
+    console.error(
+      "VYRA SPEECH → Speech Recognition not supported."
+    );
+
+    micButton.title =
+      "Speech recognition is not supported";
+
+    return;
+  }
+
+
+  const recognition =
+    new SpeechRecognition();
+
+
+  recognition.continuous = false;
+
+  recognition.interimResults = false;
+
+  recognition.lang = "en-IN";
+
+
+  // =========================================
+  // SPEECH STATE
+  // =========================================
+
+  let isListening = false;
+
+  let isSpeaking = false;
+
+
+  // =========================================
+  // VYRA SPEAK
+  // =========================================
+
+  function speak(text) {
+
+    if (!text) return;
+
+
+    if (
+      !("speechSynthesis" in window)
+    ) {
+
+      console.warn(
+        "VYRA SPEECH → Text-to-Speech not supported."
+      );
+
+      return;
+    }
+
+
+    window.speechSynthesis.cancel();
+
+
+    const cleanText =
+      String(text)
+        .replace(/<br\s*\/?>/gi, " ")
+        .replace(/<[^>]*>/g, "")
+        .trim();
+
+
+    if (!cleanText) return;
+
+
+    const utterance =
+      new SpeechSynthesisUtterance(
+        cleanText
+      );
+
+
+    /*
+      VYRA voice settings
+    */
+
+    utterance.lang = "en-IN";
+
+    utterance.rate = 0.95;
+
+    utterance.pitch = 1.05;
+
+    utterance.volume = 1;
+
+
+    utterance.onstart =
+      function () {
+
+        isSpeaking = true;
+
+        console.log(
+          "VYRA SPEECH → Speaking"
+        );
+
+        setStatus(
+          "VYRA SPEAKING"
+        );
+
+      };
+
+
+    utterance.onend =
+      function () {
+
+        isSpeaking = false;
+
+        console.log(
+          "VYRA SPEECH → Finished"
+        );
+
+        setStatus(
+          "STANDBY"
+        );
+
+      };
+
+
+    utterance.onerror =
+      function (error) {
+
+        isSpeaking = false;
+
+        console.error(
+          "VYRA TTS ERROR:",
+          error
+        );
+
+        setStatus(
+          "STANDBY"
+        );
+
+      };
+
+
+    window.speechSynthesis
+      .speak(utterance);
+
+  }
+
+
+  // =========================================
+  // STATUS
+  // =========================================
+
+  function setStatus(status) {
+
+    const statusElements =
+      document.querySelectorAll(
+        ".card p"
+      );
+
+
+    statusElements.forEach(
+      function (element) {
+
+        const text =
+          element.textContent
+            .trim()
+            .toUpperCase();
+
+
+        if (
+          text === "STANDBY" ||
+          text === "LISTENING" ||
+          text === "THINKING" ||
+          text === "VYRA SPEAKING"
+        ) {
+
+          element.textContent =
+            status;
+
+        }
+
+      }
+    );
+
+
+    console.log(
+      "VYRA STATUS →",
+      status
+    );
+
+  }
+
+
+  // =========================================
+  // HIDE TEXT RESPONSE
+  // =========================================
+
+  function hideConversationText() {
+
+    /*
+      We deliberately do not place
+      conversation messages inside
+      the greeting box.
+    */
+
+    if (!messageBox) return;
+
+
+    messageBox.innerHTML =
+      "Voice mode active. 🎙️";
+
+  }
+
+
+  // =========================================
+  // PROCESS AI MESSAGE
+  // =========================================
+
+  async function processVoiceMessage(message) {
+
+    if (!message) return;
+
+
+    console.log(
+      "VYRA SPEECH → USER:",
+      message
+    );
+
+
+    setStatus(
+      "THINKING"
+    );
+
+
+    try {
+
+      /*
+        Existing Master Core
+        handles:
+
+        Chat Agent
+        Language Agent
+        Story Agent
+        Memory Agent
+        Backend
+      */
+
+      const result =
+        await window.VYRA_MASTER.process(
+          message
+        );
+
+
+      console.log(
+        "VYRA SPEECH → AI RESULT:",
+        result
+      );
+
+
+      let reply = "";
+
+
+      if (result?.reply) {
+
+        reply =
+          result.reply;
 
       }
 
+      else if (result?.message) {
+
+        reply =
+          result.message;
+
+      }
+
+
+      if (!reply) {
+
+        console.error(
+          "VYRA SPEECH → Empty AI response."
+        );
+
+        setStatus(
+          "STANDBY"
+        );
+
+        return;
+      }
+
+
+      /*
+        IMPORTANT:
+
+        Do NOT display reply
+        as conversation text.
+      */
+
+      hideConversationText();
+
+
+      console.log(
+        "VYRA SPEECH → VYRA:",
+        reply
+      );
+
+
+      speak(reply);
+
+    }
+
+
+    catch (error) {
+
+      console.error(
+        "VYRA SPEECH ERROR:",
+        error
+      );
+
+
+      setStatus(
+        "STANDBY"
+      );
+
+
+      speak(
+        "Sorry Boss, connection mein thodi problem aa gayi."
+      );
+
+    }
+
+  }
+
+
+  // =========================================
+  // START LISTENING
+  // =========================================
+
+  function startListening() {
+
+    if (isListening) {
+
+      console.log(
+        "VYRA SPEECH → Already listening."
+      );
+
+      return;
+    }
+
+
+    if (isSpeaking) {
+
+      window.speechSynthesis.cancel();
+
+      isSpeaking = false;
+
+    }
+
+
+    try {
+
+      recognition.lang =
+        "en-IN";
+
+
+      recognition.start();
+
+    }
+
+
+    catch (error) {
+
+      console.warn(
+        "VYRA SPEECH START:",
+        error
+      );
+
+    }
+
+  }
+
+
+  // =========================================
+  // RECOGNITION START
+  // =========================================
+
+  recognition.onstart =
+    function () {
+
+      isListening = true;
+
+
+      console.log(
+        "🎤 VYRA SPEECH → LISTENING"
+      );
+
+
+      setStatus(
+        "LISTENING"
+      );
+
+    };
+
+
+  // =========================================
+  // SPEECH RESULT
+  // =========================================
+
+  recognition.onresult =
+    function (event) {
+
+      const transcript =
+        event
+          .results[
+            event.results.length - 1
+          ][0]
+          .transcript
+          .trim();
+
+
+      console.log(
+        "🎤 VYRA SPEECH → HEARD:",
+        transcript
+      );
+
+
+      if (!transcript) {
+
+        setStatus(
+          "STANDBY"
+        );
+
+        return;
+      }
+
+
+      /*
+        Do not show transcript
+        inside UI.
+      */
+
+      hideConversationText();
+
+
+      processVoiceMessage(
+        transcript
+      );
+
+    };
+
+
+  // =========================================
+  // RECOGNITION END
+  // =========================================
+
+  recognition.onend =
+    function () {
+
+      isListening = false;
+
+
+      console.log(
+        "VYRA SPEECH → LISTENING ENDED"
+      );
+
+
+      if (!isSpeaking) {
+
+        setStatus(
+          "STANDBY"
+        );
+
+      }
+
+    };
+
+
+  // =========================================
+  // RECOGNITION ERROR
+  // =========================================
+
+  recognition.onerror =
+    function (event) {
+
+      isListening = false;
+
+
+      console.error(
+        "VYRA SPEECH RECOGNITION ERROR:",
+        event.error
+      );
+
+
+      setStatus(
+        "STANDBY"
+      );
+
+
+      if (
+        event.error ===
+        "not-allowed"
+      ) {
+
+        console.warn(
+          "VYRA SPEECH → Microphone permission denied."
+        );
+
+      }
+
+
+      if (
+        event.error ===
+        "no-speech"
+      ) {
+
+        console.log(
+          "VYRA SPEECH → No speech detected."
+        );
+
+      }
+
+    };
+
+
+  // =========================================
+  // MIC BUTTON
+  // =========================================
+
+  micButton.addEventListener(
+    "click",
+    function () {
+
+      console.log(
+        "🎤 VYRA MIC → CLICK"
+      );
+
+
+      startListening();
+
     }
   );
 
 
   // =========================================
-  // STARTUP
+  // TEXT SEND — HIDDEN FALLBACK
   // =========================================
 
+  if (
+    sendButton &&
+    input
+  ) {
+
+    sendButton.addEventListener(
+      "click",
+      async function () {
+
+        const message =
+          input.value.trim();
+
+
+        if (!message) return;
+
+
+        input.value = "";
+
+
+        await processVoiceMessage(
+          message
+        );
+
+      }
+    );
+
+
+    input.addEventListener(
+      "keydown",
+      function (event) {
+
+        if (
+          event.key === "Enter"
+        ) {
+
+          event.preventDefault();
+
+
+          const message =
+            input.value.trim();
+
+
+          if (!message) return;
+
+
+          input.value = "";
+
+
+          processVoiceMessage(
+            message
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  // =========================================
+  // INITIAL STATE
+  // =========================================
+
+  hideConversationText();
+
+
+  setStatus(
+    "STANDBY"
+  );
+
+
   console.log(
-    "VYRA APP CONTROLLER: ONLINE"
+    "VYRA SPEECH SYSTEM: ONLINE"
   );
 
   console.log(
-    "Master Core:",
-    window.VYRA_MASTER
-      ? "CONNECTED"
-      : "NOT FOUND"
+    "================================="
   );
 
 });
