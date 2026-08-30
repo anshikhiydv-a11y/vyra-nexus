@@ -97,7 +97,7 @@
 
     memory: {
       name: "Memory Agent",
-      status: "planned",
+      status: "active",
       type: "memory"
     }
 
@@ -542,6 +542,11 @@ if (
 case "story":
 
   return !!window.StoryAgent;
+
+
+case "memory":
+
+  return !!window.MemoryAgent;
 
 
 default:
