@@ -4,7 +4,6 @@ export default async function handler(req, res) {
   console.log("VYRA API CHAT → REQUEST START");
   console.log("VYRA API CHAT → METHOD:", req.method);
 
-
   // =========================================
   // METHOD CHECK
   // =========================================
@@ -20,10 +19,6 @@ export default async function handler(req, res) {
 
 
   try {
-
-    // =========================================
-    // READ REQUEST
-    // =========================================
 
     const {
       message,
@@ -57,7 +52,7 @@ export default async function handler(req, res) {
 
 
     // =========================================
-    // API KEY
+    // GEMINI API KEY
     // =========================================
 
     const apiKey =
@@ -73,14 +68,15 @@ export default async function handler(req, res) {
     if (!apiKey) {
 
       return res.status(500).json({
-        error: "GEMINI_API_KEY_NEW is missing"
+        error:
+          "GEMINI_API_KEY_NEW is missing"
       });
 
     }
 
 
     // =========================================
-    // MEMORY CONTEXT
+    // MEMORY
     // =========================================
 
     let memoryText = "";
@@ -101,11 +97,10 @@ export default async function handler(req, res) {
 
 
     // =========================================
-    // VYRA SYSTEM INSTRUCTION
+    // SYSTEM INSTRUCTION
     // =========================================
 
     const systemInstruction = `
-
 You are VYRA, a personal AI assistant.
 
 Always address the user as "Boss".
@@ -136,12 +131,11 @@ Give a direct answer first.
 Do not spend unnecessary reasoning on simple conversation.
 
 Keep normal conversational replies concise unless Boss asks for detail.
-
 `;
 
 
     // =========================================
-    // BUILD PROMPT
+    // FINAL PROMPT
     // =========================================
 
     let finalPrompt = "";
@@ -150,164 +144,523 @@ Keep normal conversational replies concise unless Boss asks for detail.
     if (memoryText) {
 
       finalPrompt = `
-
 PREVIOUS CONVERSATION MEMORY:
 
 ${memoryText}
 
 END MEMORY
 
-
 CURRENT MESSAGE FROM BOSS:
 
 ${message}
 
 Respond naturally based on the current message and the relevant previous context.
-
 `;
 
     } else {
 
       finalPrompt = `
-
 CURRENT MESSAGE FROM BOSS:
 
 ${message}
 
 Respond naturally.
-
 `;
 
     }
 
 
-    console.log(
-      "VYRA API CHAT → Sending request to Gemini..."
-    );
-
-
     // =========================================
-    // GEMINI API
+    // GEMINI REQUEST
     // =========================================
 
-    const response = await fetch(
+    async function callGemini() {
 
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
-
-      {
-
-        method: "POST",
-
-        headers: {
-
-          "Content-Type":
-            "application/json",
-
-          "x-goog-api-key":
-            apiKey
-
-        },
-
-
-        body: JSON.stringify({
-
-          systemInstruction: {
-
-            parts: [
-
-              {
-                text:
-                  systemInstruction
-              }
-
-            ]
-
-          },
-
-
-          contents: [
-
-            {
-
-              role: "user",
-
-              parts: [
-
-                {
-                  text:
-                    finalPrompt
-                }
-
-              ]
-
-            }
-
-          ],
-
-
-          // =====================================
-          // FAST RESPONSE MODE
-          // =====================================
-
-          generationConfig: {
-
-            thinkingConfig: {
-
-              thinkingLevel:
-                "low"
-
-            }
-
-          }
-
-        })
-
-      }
-
-    );
-
-
-    // =========================================
-    // GEMINI RESPONSE
-    // =========================================
-
-    const data =
-      await response.json();
-
-
-    console.log(
-      "VYRA GEMINI STATUS:",
-      response.status
-    );
-
-
-    console.log(
-      "VYRA GEMINI RESPONSE RECEIVED"
-    );
-
-
-    // =========================================
-    // GEMINI ERROR
-    // =========================================
-
-    if (!response.ok) {
-
-      console.error(
-        "VYRA GEMINI ERROR:",
-        JSON.stringify(data)
+      console.log(
+        "🔥 VYRA → Sending request to Gemini..."
       );
 
 
-      return res.status(
-        response.status
-      ).json({
+      return await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            "x-goog-api-key":
+              apiKey
+          },
+
+          body: JSON.stringify({
+
+            systemInstruction: {
+
+              parts: [
+                {
+                  text:
+                    systemInstruction
+                }
+              ]
+
+            },
+
+            contents: [
+
+              {
+                role: "user",
+
+                parts: [
+
+                  {
+                    text:
+                      finalPrompt
+                  }
+
+                ]
+
+              }
+
+            ],
+
+            generationConfig: {
+
+              thinkingConfig: {
+
+                thinkingLevel:
+                  "low"
+
+              }
+
+            }
+
+          })
+
+        }
+      );
+
+    }
+
+
+    // =========================================
+    // RETRY SETTINGS
+    // =========================================
+
+    const MAX_RETRIES = 3;
+
+    let response = null;
+
+    let lastErrorData = null;
+
+
+    // =========================================
+    // GEMINI REQUEST LOOP
+    // =========================================
+
+    for (
+      let attempt = 0;
+      attempt <= MAX_RETRIES;
+      attempt++
+    ) {
+
+      try {
+
+        response =
+          await callGemini();
+
+
+        console.log(
+          "VYRA GEMINI STATUS:",
+          response.status,
+          "ATTEMPT:",
+          attempt + 1
+        );
+
+
+        // =====================================
+        // SUCCESS
+        // =====================================
+
+        if (response.ok) {
+
+          break;
+
+        }
+
+
+        // =====================================
+        // READ ERROR BODY
+        // =====================================
+
+        const errorText =
+          await response.text();
+
+
+        let errorData;
+
+
+        try {
+
+          errorData =
+            JSON.parse(errorText);
+
+        } catch {
+
+          errorData = {
+            error: {
+              message:
+                errorText ||
+                "Unknown Gemini error"
+            }
+          };
+
+        }
+
+
+        lastErrorData =
+          errorData;
+
+
+        const errorCode =
+          errorData?.error?.code ||
+          "";
+
+
+        const errorStatus =
+          errorData?.error?.status ||
+          "";
+
+
+        const errorMessage =
+          errorData?.error?.message ||
+          errorText ||
+          "Unknown Gemini error";
+
+
+        console.error(
+          "VYRA GEMINI ERROR:",
+          JSON.stringify(errorData)
+        );
+
+
+        console.error(
+          "VYRA GEMINI ERROR CODE:",
+          errorCode
+        );
+
+
+        console.error(
+          "VYRA GEMINI ERROR STATUS:",
+          errorStatus
+        );
+
+
+        // =====================================
+        // DAILY QUOTA EXHAUSTED
+        // =====================================
+        //
+        // Do NOT waste retries when Gemini says
+        // the daily quota itself is exhausted.
+        // =====================================
+
+        const dailyQuotaExceeded =
+          errorCode === "quota_exceeded" ||
+          errorStatus === "QUOTA_EXCEEDED" ||
+          /daily quota/i.test(
+            errorMessage
+          );
+
+
+        if (dailyQuotaExceeded) {
+
+          console.error(
+            "VYRA → DAILY QUOTA EXCEEDED. NO RETRY."
+          );
+
+          break;
+
+        }
+
+
+        // =====================================
+        // RETRYABLE ERRORS
+        // =====================================
+
+        const retryable =
+          response.status === 408 ||
+          response.status === 429 ||
+          response.status === 500 ||
+          response.status === 502 ||
+          response.status === 503 ||
+          response.status === 504;
+
+
+        // =====================================
+        // STOP IF NOT RETRYABLE
+        // =====================================
+
+        if (
+          !retryable ||
+          attempt >= MAX_RETRIES
+        ) {
+
+          break;
+
+        }
+
+
+        // =====================================
+        // EXPONENTIAL BACKOFF + JITTER
+        // =====================================
+
+        const baseDelay =
+          Math.pow(
+            2,
+            attempt
+          ) * 1000;
+
+
+        const jitter =
+          Math.floor(
+            Math.random() * 500
+          );
+
+
+        const delay =
+          baseDelay + jitter;
+
+
+        console.log(
+          "🔄 VYRA → Gemini temporary error."
+        );
+
+
+        console.log(
+          "🔄 VYRA → Retry",
+          attempt + 1,
+          "in",
+          delay,
+          "ms..."
+        );
+
+
+        await new Promise(
+          function (resolve) {
+
+            setTimeout(
+              resolve,
+              delay
+            );
+
+          }
+        );
+
+      } catch (networkError) {
+
+        // =====================================
+        // NETWORK ERROR
+        // =====================================
+
+        console.error(
+          "VYRA GEMINI NETWORK ERROR:",
+          networkError
+        );
+
+
+        lastErrorData = {
+
+          error: {
+
+            message:
+              networkError?.message ||
+              "Network error"
+
+          }
+
+        };
+
+
+        // Retry network errors too,
+        // but only a limited number of times.
+
+        if (
+          attempt >= MAX_RETRIES
+        ) {
+
+          break;
+
+        }
+
+
+        const baseDelay =
+          Math.pow(
+            2,
+            attempt
+          ) * 1000;
+
+
+        const jitter =
+          Math.floor(
+            Math.random() * 500
+          );
+
+
+        const delay =
+          baseDelay + jitter;
+
+
+        console.log(
+          "🔄 VYRA → Network retry in",
+          delay,
+          "ms..."
+        );
+
+
+        await new Promise(
+          function (resolve) {
+
+            setTimeout(
+              resolve,
+              delay
+            );
+
+          }
+        );
+
+      }
+
+    }
+
+
+    // =========================================
+    // FINAL ERROR
+    // =========================================
+
+    if (
+      !response ||
+      !response.ok
+    ) {
+
+      const status =
+        response?.status || 500;
+
+
+      const errorCode =
+        lastErrorData
+          ?.error
+          ?.code ||
+        "";
+
+
+      const errorStatus =
+        lastErrorData
+          ?.error
+          ?.status ||
+        "";
+
+
+      const errorMessage =
+        lastErrorData
+          ?.error
+          ?.message ||
+        "Gemini API request failed";
+
+
+      console.error(
+        "VYRA FINAL GEMINI ERROR:",
+        status,
+        errorCode,
+        errorStatus,
+        errorMessage
+      );
+
+
+      // =====================================
+      // DAILY QUOTA MESSAGE
+      // =====================================
+
+      const dailyQuotaExceeded =
+        errorCode === "quota_exceeded" ||
+        errorStatus === "QUOTA_EXCEEDED" ||
+        /daily quota/i.test(
+          errorMessage
+        );
+
+
+      if (dailyQuotaExceeded) {
+
+        return res.status(429).json({
+
+          error:
+            "Boss, Gemini की daily API quota अभी पूरी हो गई है। Quota reset होने के बाद फिर try करें।",
+
+          temporary:
+            false,
+
+          quotaExceeded:
+            true,
+
+          geminiStatus:
+            status
+
+        });
+
+      }
+
+
+      // =====================================
+      // TEMPORARY ERROR MESSAGE
+      // =====================================
+
+      const temporaryError =
+        status === 408 ||
+        status === 429 ||
+        status === 500 ||
+        status === 502 ||
+        status === 503 ||
+        status === 504;
+
+
+      if (temporaryError) {
+
+        return res.status(503).json({
+
+          error:
+            "Boss, Gemini अभी थोड़ी busy है। एक moment बाद फिर कोशिश करें।",
+
+          temporary:
+            true,
+
+          quotaExceeded:
+            false,
+
+          geminiStatus:
+            status
+
+        });
+
+      }
+
+
+      // =====================================
+      // NON-RETRYABLE ERROR
+      // =====================================
+
+      return res.status(status).json({
 
         error:
-          data?.error?.message ||
-          "Gemini API request failed",
+          errorMessage,
+
+        temporary:
+          false,
+
+        quotaExceeded:
+          false,
 
         geminiStatus:
-          response.status
+          status
 
       });
 
@@ -315,17 +668,28 @@ Respond naturally.
 
 
     // =========================================
-    // EXTRACT REPLY
+    // SUCCESS RESPONSE
     // =========================================
 
-    const reply =
+    const data =
+      await response.json();
 
+
+    console.log(
+      "VYRA GEMINI RESPONSE RECEIVED"
+    );
+
+
+    const reply =
       data
         ?.candidates?.[0]
         ?.content?.parts
         ?.map(
-          part =>
-            part.text || ""
+          function (part) {
+
+            return part.text || "";
+
+          }
         )
         ?.join("")
         ?.trim();
@@ -345,10 +709,7 @@ Respond naturally.
       return res.status(500).json({
 
         error:
-          "Gemini returned no text",
-
-        debug:
-          data
+          "Gemini returned no text"
 
       });
 
@@ -371,19 +732,17 @@ Respond naturally.
 
     return res.status(200).json({
 
-      reply: reply
+      reply:
+        reply
 
     });
 
 
-  }
+  } catch (error) {
 
-
-  // =========================================
-  // SERVER ERROR
-  // =========================================
-
-  catch (error) {
+    // =========================================
+    // UNEXPECTED SERVER ERROR
+    // =========================================
 
     console.error(
       "VYRA API CHAT ERROR:",
@@ -401,4 +760,4 @@ Respond naturally.
 
   }
 
-        }
+  }
