@@ -1,185 +1,170 @@
 export default async function handler(req, res) {
-
   console.log("=================================");
   console.log("VYRA API CHAT → REQUEST START");
   console.log("VYRA API CHAT → METHOD:", req.method);
 
-  // =========================================
-  // METHOD CHECK
-  // =========================================
-
   if (req.method !== "POST") {
-
     return res.status(405).json({
       error: "Method not allowed",
       method: req.method
     });
-
   }
 
-
   try {
+    const { message, memory } = req.body || {};
 
-    const {
-      message,
-      memory
-    } = req.body || {};
-
-
-    console.log(
-      "VYRA API CHAT → MESSAGE:",
-      message
-    );
-
-
+    console.log("VYRA API CHAT → MESSAGE:", message);
     console.log(
       "VYRA API CHAT → MEMORY RECEIVED:",
       memory ? "YES" : "NO"
     );
 
-
-    // =========================================
-    // MESSAGE CHECK
-    // =========================================
-
     if (!message) {
-
       return res.status(400).json({
         error: "Message is required"
       });
-
     }
 
-
-    // =========================================
-    // GEMINI API KEY
-    // =========================================
-
-    const apiKey =
-      process.env.GEMINI_API_KEY_NEW;
-
+    const apiKey = process.env.GEMINI_API_KEY_NEW;
 
     console.log(
       "VYRA API CHAT → API KEY:",
       apiKey ? "FOUND" : "MISSING"
     );
 
-
     if (!apiKey) {
-
       return res.status(500).json({
-        error:
-          "GEMINI_API_KEY_NEW is missing"
+        error: "GEMINI_API_KEY_NEW is missing"
       });
-
     }
-
-
-    // =========================================
-    // MEMORY
-    // =========================================
 
     let memoryText = "";
 
-
     if (memory) {
-
-      memoryText =
-        String(memory).slice(0, 12000);
-
+      memoryText = String(memory).slice(0, 12000);
     }
 
-
-    console.log(
-      "VYRA API CHAT → MEMORY LENGTH:",
-      memoryText.length
-    );
-
-
-    // =========================================
-    // SYSTEM INSTRUCTION
-    // =========================================
-
     const systemInstruction = `
-You are VYRA, a personal AI assistant.
+You are VYRA, Boss's personal AI assistant.
 
-Always address the user as "Boss".
+LANGUAGE:
+- Communicate naturally in Hindi, English, or Hinglish.
+- Match the language style Boss is using.
+- If Boss mixes Hindi and English, natural Hinglish is allowed.
 
-You can naturally communicate in:
-- Hindi
-- English
-- Hinglish
+PERSONALITY:
+- Friendly
+- Intelligent
+- Natural
+- Conversational
+- Helpful
+- Calm and expressive
+- Speak like a familiar personal assistant, NOT like customer support.
 
-You are friendly, helpful, intelligent and natural.
+IMPORTANT:
+Do NOT begin every response with "Boss".
+Do NOT repeatedly use phrases such as:
+"हाँ Boss, बताइए..."
+"अच्छा Boss, बताइए..."
+"मैं क्या मदद कर सकती हूँ?"
+"बताइए मैं आपकी क्या मदद कर सकती हूँ?"
+"जी Boss, मैं आपकी क्या मदद कर सकती हूँ?"
 
-IMPORTANT MEMORY RULES:
+These phrases should NOT become a fixed response pattern.
 
+NATURAL CONVERSATION RULES:
+1. If Boss asks a direct question, answer directly.
+2. If Boss gives an idea, react to the idea instead of asking what help is needed.
+3. If Boss reports a problem, immediately help investigate or solve it.
+4. If Boss continues an existing topic, continue from the existing context.
+5. Do not ask Boss to repeat information that is already available in memory.
+6. Use short acknowledgements only when they naturally fit.
+7. Vary your sentence openings naturally.
+8. "Boss" may be used occasionally, but never force it into every response.
+9. Do not sound like a scripted chatbot.
+10. Do not repeat the same acknowledgement unnecessarily.
+11. Avoid unnecessary greetings when the conversation is already ongoing.
+12. If a simple answer is enough, keep it simple.
+13. If detailed explanation is needed, provide the detail naturally.
+
+CONVERSATIONAL EXAMPLES:
+
+If Boss says:
+"I have an idea."
+
+Natural response:
+"बोलो Boss, सुन रही हूँ।"
+
+Do NOT automatically say:
+"हाँ Boss, बताइए मैं आपकी क्या मदद कर सकती हूँ?"
+
+If Boss says:
+"This isn't working."
+
+Natural response:
+"ठीक है, देखते हैं कहाँ problem आ रही है।"
+
+If Boss asks:
+"Why is this happening?"
+
+Natural response:
+"इसके पीछे मुख्य वजह ये है..."
+
+If Boss says:
+"अब इसमें ElevenLabs लगा देते हैं।"
+
+Natural response:
+"हाँ, ये better रहेगा। इससे Gemini पर TTS का extra load भी नहीं पड़ेगा।"
+
+FEMININE LANGUAGE:
+When speaking Hindi/Hinglish, feminine grammatical forms are preferred where natural:
+- "मैं बता देती हूँ"
+- "मैं देख लेती हूँ"
+- "मैं कर देती हूँ"
+- "मैं समझ गई"
+- "मैं check कर लेती हूँ"
+
+Do not force feminine wording into every sentence.
+
+MEMORY:
 1. Previous conversation context may be provided below.
-2. Use it to understand references such as:
-   "meri wali choice",
-   "kal hum kya baat kar rahe the?",
-   "maine tumhe kya bataya tha?"
-3. Do not pretend to remember something that is not present in the memory context.
-4. If the memory context contains the answer, use it naturally.
-5. Do not unnecessarily repeat the entire memory.
-6. Continue the conversation naturally.
+2. Use relevant memory naturally.
+3. Do not pretend to remember something that is not present.
+4. Do not repeat the entire memory.
+5. Use memory only when relevant to the current message.
 
-IMPORTANT RESPONSE RULE:
-
-Give a direct answer first.
-
-Do not spend unnecessary reasoning on simple conversation.
-
-Keep normal conversational replies concise unless Boss asks for detail.
+RESPONSE STYLE:
+Give the useful answer first.
+Avoid unnecessary filler.
+Do not repeatedly introduce yourself.
+Continue the conversation naturally.
 `;
-
-
-    // =========================================
-    // FINAL PROMPT
-    // =========================================
 
     let finalPrompt = "";
 
-
     if (memoryText) {
-
       finalPrompt = `
 PREVIOUS CONVERSATION MEMORY:
-
 ${memoryText}
-
 END MEMORY
 
 CURRENT MESSAGE FROM BOSS:
-
 ${message}
 
-Respond naturally based on the current message and the relevant previous context.
+Respond naturally to the current message.
+Use previous context only when relevant.
 `;
-
     } else {
-
       finalPrompt = `
 CURRENT MESSAGE FROM BOSS:
-
 ${message}
 
 Respond naturally.
 `;
-
     }
 
-
-    // =========================================
-    // GEMINI REQUEST
-    // =========================================
-
     async function callGemini() {
-
-      console.log(
-        "🔥 VYRA → Sending request to Gemini..."
-      );
-
+      console.log("🔥 VYRA → Sending request to Gemini...");
 
       return await fetch(
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
@@ -187,89 +172,48 @@ Respond naturally.
           method: "POST",
 
           headers: {
-            "Content-Type":
-              "application/json",
-
-            "x-goog-api-key":
-              apiKey
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
           },
 
           body: JSON.stringify({
-
             systemInstruction: {
-
               parts: [
                 {
-                  text:
-                    systemInstruction
+                  text: systemInstruction
                 }
               ]
-
             },
 
             contents: [
-
               {
                 role: "user",
-
                 parts: [
-
                   {
-                    text:
-                      finalPrompt
+                    text: finalPrompt
                   }
-
                 ]
-
               }
-
             ],
 
             generationConfig: {
-
               thinkingConfig: {
-
-                thinkingLevel:
-                  "low"
-
+                thinkingLevel: "low"
               }
-
             }
-
           })
-
         }
       );
-
     }
-
-
-    // =========================================
-    // RETRY SETTINGS
-    // =========================================
 
     const MAX_RETRIES = 3;
 
     let response = null;
-
     let lastErrorData = null;
 
-
-    // =========================================
-    // GEMINI REQUEST LOOP
-    // =========================================
-
-    for (
-      let attempt = 0;
-      attempt <= MAX_RETRIES;
-      attempt++
-    ) {
-
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
-
-        response =
-          await callGemini();
-
+        response = await callGemini();
 
         console.log(
           "VYRA GEMINI STATUS:",
@@ -278,115 +222,49 @@ Respond naturally.
           attempt + 1
         );
 
-
-        // =====================================
-        // SUCCESS
-        // =====================================
-
         if (response.ok) {
-
           break;
-
         }
 
-
-        // =====================================
-        // READ ERROR BODY
-        // =====================================
-
-        const errorText =
-          await response.text();
-
+        const errorText = await response.text();
 
         let errorData;
 
-
         try {
-
-          errorData =
-            JSON.parse(errorText);
-
+          errorData = JSON.parse(errorText);
         } catch {
-
           errorData = {
             error: {
-              message:
-                errorText ||
-                "Unknown Gemini error"
+              message: errorText || "Unknown Gemini error"
             }
           };
-
         }
 
+        lastErrorData = errorData;
 
-        lastErrorData =
-          errorData;
-
-
-        const errorCode =
-          errorData?.error?.code ||
-          "";
-
-
-        const errorStatus =
-          errorData?.error?.status ||
-          "";
-
-
+        const errorCode = errorData?.error?.code || "";
+        const errorStatus = errorData?.error?.status || "";
         const errorMessage =
           errorData?.error?.message ||
           errorText ||
           "Unknown Gemini error";
-
 
         console.error(
           "VYRA GEMINI ERROR:",
           JSON.stringify(errorData)
         );
 
-
-        console.error(
-          "VYRA GEMINI ERROR CODE:",
-          errorCode
-        );
-
-
-        console.error(
-          "VYRA GEMINI ERROR STATUS:",
-          errorStatus
-        );
-
-
-        // =====================================
-        // DAILY QUOTA EXHAUSTED
-        // =====================================
-        //
-        // Do NOT waste retries when Gemini says
-        // the daily quota itself is exhausted.
-        // =====================================
-
         const dailyQuotaExceeded =
           errorCode === "quota_exceeded" ||
           errorStatus === "QUOTA_EXCEEDED" ||
-          /daily quota/i.test(
-            errorMessage
-          );
-
+          /daily quota/i.test(errorMessage);
 
         if (dailyQuotaExceeded) {
-
           console.error(
             "VYRA → DAILY QUOTA EXCEEDED. NO RETRY."
           );
-
           break;
-
         }
-
-
-        // =====================================
-        // RETRYABLE ERRORS
-        // =====================================
 
         const retryable =
           response.status === 408 ||
@@ -396,223 +274,82 @@ Respond naturally.
           response.status === 503 ||
           response.status === 504;
 
-
-        // =====================================
-        // STOP IF NOT RETRYABLE
-        // =====================================
-
-        if (
-          !retryable ||
-          attempt >= MAX_RETRIES
-        ) {
-
+        if (!retryable || attempt >= MAX_RETRIES) {
           break;
-
         }
 
-
-        // =====================================
-        // EXPONENTIAL BACKOFF + JITTER
-        // =====================================
-
-        const baseDelay =
-          Math.pow(
-            2,
-            attempt
-          ) * 1000;
-
-
-        const jitter =
-          Math.floor(
-            Math.random() * 500
-          );
-
-
-        const delay =
-          baseDelay + jitter;
-
+        const baseDelay = Math.pow(2, attempt) * 1000;
+        const jitter = Math.floor(Math.random() * 500);
+        const delay = baseDelay + jitter;
 
         console.log(
-          "🔄 VYRA → Gemini temporary error."
-        );
-
-
-        console.log(
-          "🔄 VYRA → Retry",
-          attempt + 1,
-          "in",
+          "🔄 VYRA → Retry in",
           delay,
           "ms..."
         );
 
-
-        await new Promise(
-          function (resolve) {
-
-            setTimeout(
-              resolve,
-              delay
-            );
-
-          }
-        );
+        await new Promise(function (resolve) {
+          setTimeout(resolve, delay);
+        });
 
       } catch (networkError) {
-
-        // =====================================
-        // NETWORK ERROR
-        // =====================================
 
         console.error(
           "VYRA GEMINI NETWORK ERROR:",
           networkError
         );
 
-
         lastErrorData = {
-
           error: {
-
             message:
               networkError?.message ||
               "Network error"
-
           }
-
         };
 
-
-        // Retry network errors too,
-        // but only a limited number of times.
-
-        if (
-          attempt >= MAX_RETRIES
-        ) {
-
+        if (attempt >= MAX_RETRIES) {
           break;
-
         }
 
+        const baseDelay = Math.pow(2, attempt) * 1000;
+        const jitter = Math.floor(Math.random() * 500);
+        const delay = baseDelay + jitter;
 
-        const baseDelay =
-          Math.pow(
-            2,
-            attempt
-          ) * 1000;
-
-
-        const jitter =
-          Math.floor(
-            Math.random() * 500
-          );
-
-
-        const delay =
-          baseDelay + jitter;
-
-
-        console.log(
-          "🔄 VYRA → Network retry in",
-          delay,
-          "ms..."
-        );
-
-
-        await new Promise(
-          function (resolve) {
-
-            setTimeout(
-              resolve,
-              delay
-            );
-
-          }
-        );
-
+        await new Promise(function (resolve) {
+          setTimeout(resolve, delay);
+        });
       }
-
     }
 
+    if (!response || !response.ok) {
 
-    // =========================================
-    // FINAL ERROR
-    // =========================================
-
-    if (
-      !response ||
-      !response.ok
-    ) {
-
-      const status =
-        response?.status || 500;
-
+      const status = response?.status || 500;
 
       const errorCode =
-        lastErrorData
-          ?.error
-          ?.code ||
-        "";
-
+        lastErrorData?.error?.code || "";
 
       const errorStatus =
-        lastErrorData
-          ?.error
-          ?.status ||
-        "";
-
+        lastErrorData?.error?.status || "";
 
       const errorMessage =
-        lastErrorData
-          ?.error
-          ?.message ||
+        lastErrorData?.error?.message ||
         "Gemini API request failed";
-
-
-      console.error(
-        "VYRA FINAL GEMINI ERROR:",
-        status,
-        errorCode,
-        errorStatus,
-        errorMessage
-      );
-
-
-      // =====================================
-      // DAILY QUOTA MESSAGE
-      // =====================================
 
       const dailyQuotaExceeded =
         errorCode === "quota_exceeded" ||
         errorStatus === "QUOTA_EXCEEDED" ||
-        /daily quota/i.test(
-          errorMessage
-        );
-
+        /daily quota/i.test(errorMessage);
 
       if (dailyQuotaExceeded) {
 
         return res.status(429).json({
-
           error:
             "Boss, Gemini की daily API quota अभी पूरी हो गई है। Quota reset होने के बाद फिर try करें।",
-
-          temporary:
-            false,
-
-          quotaExceeded:
-            true,
-
-          geminiStatus:
-            status
-
+          temporary: false,
+          quotaExceeded: true,
+          geminiStatus: status
         });
-
       }
-
-
-      // =====================================
-      // TEMPORARY ERROR MESSAGE
-      // =====================================
 
       const temporaryError =
         status === 408 ||
@@ -622,82 +359,38 @@ Respond naturally.
         status === 503 ||
         status === 504;
 
-
       if (temporaryError) {
 
         return res.status(503).json({
-
           error:
             "Boss, Gemini अभी थोड़ी busy है। एक moment बाद फिर कोशिश करें।",
-
-          temporary:
-            true,
-
-          quotaExceeded:
-            false,
-
-          geminiStatus:
-            status
-
+          temporary: true,
+          quotaExceeded: false,
+          geminiStatus: status
         });
-
       }
 
-
-      // =====================================
-      // NON-RETRYABLE ERROR
-      // =====================================
-
       return res.status(status).json({
-
-        error:
-          errorMessage,
-
-        temporary:
-          false,
-
-        quotaExceeded:
-          false,
-
-        geminiStatus:
-          status
-
+        error: errorMessage,
+        temporary: false,
+        quotaExceeded: false,
+        geminiStatus: status
       });
-
     }
 
-
-    // =========================================
-    // SUCCESS RESPONSE
-    // =========================================
-
-    const data =
-      await response.json();
-
+    const data = await response.json();
 
     console.log(
       "VYRA GEMINI RESPONSE RECEIVED"
     );
 
-
     const reply =
-      data
-        ?.candidates?.[0]
-        ?.content?.parts
-        ?.map(
-          function (part) {
-
-            return part.text || "";
-
-          }
-        )
-        ?.join("")
-        ?.trim();
-
-
-    // =========================================
-    // EMPTY RESPONSE
-    // =========================================
+      data?.candidates?.[0]?.content?.parts
+        ?.map(function (part) {
+          return part.text || "";
+        })
+        .join("")
+        .trim();
 
     if (!reply) {
 
@@ -705,59 +398,32 @@ Respond naturally.
         "VYRA GEMINI → NO TEXT RESPONSE"
       );
 
-
       return res.status(500).json({
-
-        error:
-          "Gemini returned no text"
-
+        error: "Gemini returned no text"
       });
-
     }
-
-
-    // =========================================
-    // SUCCESS
-    // =========================================
 
     console.log(
       "VYRA API CHAT → REPLY READY"
     );
 
-
-    console.log(
-      "================================="
-    );
-
+    console.log("=================================");
 
     return res.status(200).json({
-
-      reply:
-        reply
-
+      reply
     });
 
-
   } catch (error) {
-
-    // =========================================
-    // UNEXPECTED SERVER ERROR
-    // =========================================
 
     console.error(
       "VYRA API CHAT ERROR:",
       error
     );
 
-
     return res.status(500).json({
-
       error:
         error?.message ||
         "Internal server error"
-
     });
-
   }
-
-  }
+              }
