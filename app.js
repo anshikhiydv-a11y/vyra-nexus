@@ -1,626 +1,474 @@
 /* =========================================
-   VYRA NEXUS — APP CONTROLLER
-   Speech-to-Speech Edition v1.0
-   Master Core + Memory Connected
+   AV — APP CONTROLLER
+   Speech-to-Speech Edition v2.0
+   ElevenLabs TTS + Master Core + Memory
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
   "use strict";
 
-
-  // =========================================
-  // UI ELEMENTS
-  // =========================================
-
-  const input =
-    document.querySelector(".command input");
-
-  const sendButton =
-    document.querySelector(".send");
-
-  const micButton =
-    document.querySelector(".mic");
-
-  const messageBox =
-    document.querySelector(".greeting p");
-
-
-  // =========================================
-  // SYSTEM CHECK
-  // =========================================
+  const input = document.querySelector(".command input");
+  const sendButton = document.querySelector(".send");
+  const micButton = document.querySelector(".mic");
+  const messageBox = document.querySelector(".greeting p");
 
   if (!micButton) {
-
-    console.error(
-      "VYRA SPEECH → Mic button not found."
-    );
-
+    console.error("AV SPEECH → Mic button not found.");
     return;
   }
 
-
   if (!window.VYRA_MASTER) {
-
-    console.error(
-      "VYRA → Master Core not found."
-    );
+    console.error("AV → Master Core not found.");
 
     if (messageBox) {
-      messageBox.textContent =
-        "VYRA system connection error.";
+      messageBox.textContent = "AV system connection error.";
     }
 
     return;
   }
 
-
-  console.log(
-    "================================="
-  );
-
-  console.log(
-    "VYRA SPEECH SYSTEM: INITIALIZING"
-  );
-
-  console.log(
-    "Master Core: CONNECTED"
-  );
-
-
-  // =========================================
-  // SPEECH RECOGNITION
-  // =========================================
+  console.log("=================================");
+  console.log("AV SPEECH SYSTEM: INITIALIZING");
+  console.log("Master Core: CONNECTED");
+  console.log("ElevenLabs TTS: READY");
+  console.log("=================================");
 
   const SpeechRecognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
-
   if (!SpeechRecognition) {
-
-    console.error(
-      "VYRA SPEECH → Speech Recognition not supported."
-    );
-
-    micButton.title =
-      "Speech recognition is not supported";
-
+    console.error("AV SPEECH → Speech Recognition not supported.");
+    micButton.title = "Speech recognition is not supported";
     return;
   }
 
-
-  const recognition =
-    new SpeechRecognition();
-
+  const recognition = new SpeechRecognition();
 
   recognition.continuous = false;
-
   recognition.interimResults = false;
-
   recognition.lang = "en-IN";
 
-
-  // =========================================
-  // SPEECH STATE
-  // =========================================
-
   let isListening = false;
-
   let isSpeaking = false;
+  let currentAudio = null;
+  let currentAudioUrl = null;
 
+  /* =========================================
+     CLEAN TEXT FOR SPEECH
+  ========================================= */
 
-  // =========================================
-  // VYRA SPEAK
-  // =========================================
+  function cleanSpeechText(text) {
+    return String(text || "")
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]*>/g, "")
+      .replace(/\*\*/g, "")
+      .replace(/\*/g, "")
+      .replace(/#{1,6}\s/g, "")
+      .replace(/^\s*[-•]\s*/gm, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
-  function speak(text) {
+  /* =========================================
+     STOP CURRENT AUDIO
+  ========================================= */
 
-    if (!text) return;
+  function stopCurrentAudio() {
+    if (currentAudio) {
+      try {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      } catch (error) {
+        console.warn("AV AUDIO STOP:", error);
+      }
 
+      currentAudio = null;
+    }
 
-    if (
-      !("speechSynthesis" in window)
-    ) {
+    if (currentAudioUrl) {
+      URL.revokeObjectURL(currentAudioUrl);
+      currentAudioUrl = null;
+    }
 
-      console.warn(
-        "VYRA SPEECH → Text-to-Speech not supported."
-      );
+    isSpeaking = false;
+  }
 
+  /* =========================================
+     ELEVENLABS TTS
+  ========================================= */
+
+  async function speak(text) {
+
+    const cleanText = cleanSpeechText(text);
+
+    if (!cleanText) {
+      console.warn("AV TTS → Empty text.");
       return;
     }
 
+    stopCurrentAudio();
 
-    window.speechSynthesis.cancel();
+    try {
 
+      console.log("🔊 AV TTS → Requesting voice...");
+      console.log("AV TTS → Text:", cleanText);
 
-    const cleanText =
-      String(text)
-        .replace(/<br\s*\/?>/gi, " ")
-        .replace(/<[^>]*>/g, "")
-        .trim();
+      setStatus("VYLEN SPEAKING");
 
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text: cleanText
+        })
+      });
 
-    if (!cleanText) return;
-
-
-    const utterance =
-      new SpeechSynthesisUtterance(
-        cleanText
+      console.log(
+        "🔊 AV TTS → Response:",
+        response.status
       );
 
+      if (!response.ok) {
 
-    /*
-      VYRA voice settings
-    */
+        let errorMessage = "Voice generation failed.";
 
-    utterance.lang = "en-IN";
+        try {
+          const data = await response.json();
 
-    utterance.rate = 0.95;
+          if (data?.error) {
+            errorMessage = data.error;
+          }
 
-    utterance.pitch = 1.05;
+        } catch (error) {
+          console.warn("AV TTS → Error response was not JSON.");
+        }
 
-    utterance.volume = 1;
+        throw new Error(errorMessage);
+      }
 
+      const audioBlob = await response.blob();
 
-    utterance.onstart =
-      function () {
+      if (!audioBlob.size) {
+        throw new Error("Empty audio received.");
+      }
 
+      currentAudioUrl = URL.createObjectURL(audioBlob);
+
+      currentAudio = new Audio(currentAudioUrl);
+
+      currentAudio.preload = "auto";
+      currentAudio.volume = 1.0;
+
+      currentAudio.onplay = function () {
         isSpeaking = true;
 
-        console.log(
-          "VYRA SPEECH → Speaking"
-        );
-
-        setStatus(
-          "VYRA SPEAKING"
-        );
-
+        console.log("🔊 AV TTS → SPEAKING");
+        setStatus("VYLEN SPEAKING");
       };
 
+      currentAudio.onended = function () {
 
-    utterance.onend =
-      function () {
+        console.log("🔊 AV TTS → FINISHED");
 
         isSpeaking = false;
 
-        console.log(
-          "VYRA SPEECH → Finished"
-        );
+        if (currentAudioUrl) {
+          URL.revokeObjectURL(currentAudioUrl);
+          currentAudioUrl = null;
+        }
 
-        setStatus(
-          "STANDBY"
-        );
+        currentAudio = null;
 
+        if (!isListening) {
+          setStatus("STANDBY");
+        }
       };
 
-
-    utterance.onerror =
-      function (error) {
-
-        isSpeaking = false;
+      currentAudio.onerror = function (error) {
 
         console.error(
-          "VYRA TTS ERROR:",
+          "AV AUDIO PLAYBACK ERROR:",
           error
         );
 
-        setStatus(
-          "STANDBY"
-        );
+        isSpeaking = false;
+        currentAudio = null;
 
+        if (currentAudioUrl) {
+          URL.revokeObjectURL(currentAudioUrl);
+          currentAudioUrl = null;
+        }
+
+        setStatus("STANDBY");
       };
 
+      const playPromise = currentAudio.play();
 
-    window.speechSynthesis
-      .speak(utterance);
+      if (playPromise !== undefined) {
 
+        await playPromise;
+
+        console.log("🔊 AV TTS → Playback started.");
+
+      }
+
+    } catch (error) {
+
+      console.error("AV TTS ERROR:", error);
+
+      isSpeaking = false;
+
+      setStatus("STANDBY");
+
+      if (messageBox) {
+        messageBox.textContent =
+          "AV voice service में थोड़ी problem आ गई।";
+      }
+    }
   }
 
-
-  // =========================================
-  // STATUS
-  // =========================================
+  /* =========================================
+     STATUS
+  ========================================= */
 
   function setStatus(status) {
 
     const statusElements =
-      document.querySelectorAll(
-        ".card p"
-      );
+      document.querySelectorAll(".card p");
 
+    statusElements.forEach(function (element) {
 
-    statusElements.forEach(
-      function (element) {
+      const text =
+        element.textContent.trim().toUpperCase();
 
-        const text =
-          element.textContent
-            .trim()
-            .toUpperCase();
-
-
-        if (
-          text === "STANDBY" ||
-          text === "LISTENING" ||
-          text === "THINKING" ||
-          text === "VYRA SPEAKING"
-        ) {
-
-          element.textContent =
-            status;
-
-        }
-
+      if (
+        text === "STANDBY" ||
+        text === "LISTENING" ||
+        text === "THINKING" ||
+        text === "VYRA SPEAKING" ||
+        text === "VYLEN SPEAKING" ||
+        text === "AV SPEAKING"
+      ) {
+        element.textContent = status;
       }
-    );
 
+    });
 
-    console.log(
-      "VYRA STATUS →",
-      status
-    );
-
+    console.log("AV STATUS →", status);
   }
 
-
-  // =========================================
-  // HIDE TEXT RESPONSE
-  // =========================================
+  /* =========================================
+     HIDE CONVERSATION TEXT
+  ========================================= */
 
   function hideConversationText() {
 
-    /*
-      We deliberately do not place
-      conversation messages inside
-      the greeting box.
-    */
-
     if (!messageBox) return;
-
 
     messageBox.innerHTML =
       "Voice mode active. 🎙️";
-
   }
 
-
-  // =========================================
-  // PROCESS AI MESSAGE
-  // =========================================
+  /* =========================================
+     PROCESS MESSAGE
+  ========================================= */
 
   async function processVoiceMessage(message) {
 
     if (!message) return;
 
+    console.log("AV SPEECH → USER:", message);
 
-    console.log(
-      "VYRA SPEECH → USER:",
-      message
-    );
-
-
-    setStatus(
-      "THINKING"
-    );
-
+    setStatus("THINKING");
 
     try {
 
-      /*
-        Existing Master Core
-        handles:
-
-        Chat Agent
-        Language Agent
-        Story Agent
-        Memory Agent
-        Backend
-      */
-
       const result =
-        await window.VYRA_MASTER.process(
-          message
-        );
-
+        await window.VYRA_MASTER.process(message);
 
       console.log(
-        "VYRA SPEECH → AI RESULT:",
+        "AV SPEECH → AI RESULT:",
         result
       );
 
-
       let reply = "";
 
-
       if (result?.reply) {
-
-        reply =
-          result.reply;
-
+        reply = result.reply;
+      } else if (result?.message) {
+        reply = result.message;
       }
-
-      else if (result?.message) {
-
-        reply =
-          result.message;
-
-      }
-
 
       if (!reply) {
 
         console.error(
-          "VYRA SPEECH → Empty AI response."
+          "AV SPEECH → Empty AI response."
         );
 
-        setStatus(
-          "STANDBY"
-        );
-
+        setStatus("STANDBY");
         return;
       }
 
-
-      /*
-        IMPORTANT:
-
-        Do NOT display reply
-        as conversation text.
-      */
-
       hideConversationText();
 
+      console.log("AV SPEECH → AV:", reply);
 
-      console.log(
-        "VYRA SPEECH → VYRA:",
-        reply
-      );
+      await speak(reply);
 
-
-      speak(reply);
-
-    }
-
-
-    catch (error) {
+    } catch (error) {
 
       console.error(
-        "VYRA SPEECH ERROR:",
+        "AV SPEECH ERROR:",
         error
       );
 
+      setStatus("STANDBY");
 
-      setStatus(
-        "STANDBY"
-      );
-
-
-      speak(
-        "Sorry Boss, connection mein thodi problem aa gayi."
-      );
-
+      if (messageBox) {
+        messageBox.textContent =
+          "AV connection में थोड़ी problem आ गई।";
+      }
     }
-
   }
 
-
-  // =========================================
-  // START LISTENING
-  // =========================================
+  /* =========================================
+     START LISTENING
+  ========================================= */
 
   function startListening() {
 
     if (isListening) {
 
       console.log(
-        "VYRA SPEECH → Already listening."
+        "AV SPEECH → Already listening."
       );
 
       return;
     }
 
-
     if (isSpeaking) {
-
-      window.speechSynthesis.cancel();
-
-      isSpeaking = false;
-
+      stopCurrentAudio();
     }
-
 
     try {
 
-      recognition.lang =
-        "en-IN";
-
+      recognition.lang = "en-IN";
 
       recognition.start();
 
-    }
-
-
-    catch (error) {
+    } catch (error) {
 
       console.warn(
-        "VYRA SPEECH START:",
+        "AV SPEECH START:",
         error
       );
-
     }
-
   }
 
+  /* =========================================
+     SPEECH RECOGNITION EVENTS
+  ========================================= */
 
-  // =========================================
-  // RECOGNITION START
-  // =========================================
+  recognition.onstart = function () {
 
-  recognition.onstart =
-    function () {
+    isListening = true;
 
-      isListening = true;
+    console.log(
+      "🎤 AV SPEECH → LISTENING"
+    );
 
+    setStatus("LISTENING");
+  };
+
+  recognition.onresult = function (event) {
+
+    const transcript =
+      event.results[
+        event.results.length - 1
+      ][0].transcript.trim();
+
+    console.log(
+      "🎤 AV SPEECH → HEARD:",
+      transcript
+    );
+
+    if (!transcript) {
+
+      setStatus("STANDBY");
+
+      return;
+    }
+
+    hideConversationText();
+
+    processVoiceMessage(transcript);
+  };
+
+  recognition.onend = function () {
+
+    isListening = false;
+
+    console.log(
+      "AV SPEECH → LISTENING ENDED"
+    );
+
+    if (!isSpeaking) {
+      setStatus("STANDBY");
+    }
+  };
+
+  recognition.onerror = function (event) {
+
+    isListening = false;
+
+    console.error(
+      "AV SPEECH RECOGNITION ERROR:",
+      event.error
+    );
+
+    setStatus("STANDBY");
+
+    if (event.error === "not-allowed") {
+
+      console.warn(
+        "AV SPEECH → Microphone permission denied."
+      );
+    }
+
+    if (event.error === "no-speech") {
 
       console.log(
-        "🎤 VYRA SPEECH → LISTENING"
+        "AV SPEECH → No speech detected."
       );
+    }
+  };
 
-
-      setStatus(
-        "LISTENING"
-      );
-
-    };
-
-
-  // =========================================
-  // SPEECH RESULT
-  // =========================================
-
-  recognition.onresult =
-    function (event) {
-
-      const transcript =
-        event
-          .results[
-            event.results.length - 1
-          ][0]
-          .transcript
-          .trim();
-
-
-      console.log(
-        "🎤 VYRA SPEECH → HEARD:",
-        transcript
-      );
-
-
-      if (!transcript) {
-
-        setStatus(
-          "STANDBY"
-        );
-
-        return;
-      }
-
-
-      /*
-        Do not show transcript
-        inside UI.
-      */
-
-      hideConversationText();
-
-
-      processVoiceMessage(
-        transcript
-      );
-
-    };
-
-
-  // =========================================
-  // RECOGNITION END
-  // =========================================
-
-  recognition.onend =
-    function () {
-
-      isListening = false;
-
-
-      console.log(
-        "VYRA SPEECH → LISTENING ENDED"
-      );
-
-
-      if (!isSpeaking) {
-
-        setStatus(
-          "STANDBY"
-        );
-
-      }
-
-    };
-
-
-  // =========================================
-  // RECOGNITION ERROR
-  // =========================================
-
-  recognition.onerror =
-    function (event) {
-
-      isListening = false;
-
-
-      console.error(
-        "VYRA SPEECH RECOGNITION ERROR:",
-        event.error
-      );
-
-
-      setStatus(
-        "STANDBY"
-      );
-
-
-      if (
-        event.error ===
-        "not-allowed"
-      ) {
-
-        console.warn(
-          "VYRA SPEECH → Microphone permission denied."
-        );
-
-      }
-
-
-      if (
-        event.error ===
-        "no-speech"
-      ) {
-
-        console.log(
-          "VYRA SPEECH → No speech detected."
-        );
-
-      }
-
-    };
-
-
-  // =========================================
-  // MIC BUTTON
-  // =========================================
+  /* =========================================
+     MICROPHONE BUTTON
+  ========================================= */
 
   micButton.addEventListener(
     "click",
     function () {
 
       console.log(
-        "🎤 VYRA MIC → CLICK"
+        "🎤 AV MIC → CLICK"
       );
 
-
       startListening();
-
     }
   );
 
+  /* =========================================
+     TEXT SEND BUTTON
+  ========================================= */
 
-  // =========================================
-  // TEXT SEND — HIDDEN FALLBACK
-  // =========================================
-
-  if (
-    sendButton &&
-    input
-  ) {
+  if (sendButton && input) {
 
     sendButton.addEventListener(
       "click",
@@ -629,68 +477,49 @@ document.addEventListener("DOMContentLoaded", function () {
         const message =
           input.value.trim();
 
-
         if (!message) return;
-
 
         input.value = "";
 
-
-        await processVoiceMessage(
-          message
-        );
-
+        await processVoiceMessage(message);
       }
     );
-
 
     input.addEventListener(
       "keydown",
       function (event) {
 
-        if (
-          event.key === "Enter"
-        ) {
+        if (event.key === "Enter") {
 
           event.preventDefault();
-
 
           const message =
             input.value.trim();
 
-
           if (!message) return;
-
 
           input.value = "";
 
-
-          processVoiceMessage(
-            message
-          );
-
+          processVoiceMessage(message);
         }
-
       }
     );
-
   }
 
-
-  // =========================================
-  // INITIAL STATE
-  // =========================================
+  /* =========================================
+     INITIAL STATE
+  ========================================= */
 
   hideConversationText();
 
-
-  setStatus(
-    "STANDBY"
-  );
-
+  setStatus("STANDBY");
 
   console.log(
-    "VYRA SPEECH SYSTEM: ONLINE"
+    "AV SPEECH SYSTEM: ONLINE"
+  );
+
+  console.log(
+    "AV ELEVENLABS TTS: CONNECTED"
   );
 
   console.log(
