@@ -3,516 +3,561 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>VYRA Nexus</title>
+  <title>AV — AI Assistant</title>
 
   <style>
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    :root {
+      --bg: #050509;
+      --panel: rgba(18, 13, 31, 0.82);
+      --panel-light: rgba(31, 20, 51, 0.72);
+
+      --purple: #9b5cff;
+      --purple-bright: #bd7aff;
+      --violet: #6f38ff;
+
+      --text: #ffffff;
+      --muted: #aaa4bc;
+
+      --green: #55e6ad;
+
+      --border: rgba(155, 92, 255, 0.28);
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      background: var(--bg);
+    }
+
     body {
       min-height: 100vh;
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+
       background:
         radial-gradient(
-          circle at center,
-          #17103b,
-          #050711 70%
+          circle at 50% 20%,
+          rgba(111, 56, 255, 0.20),
+          transparent 38%
+        ),
+        radial-gradient(
+          circle at 50% 70%,
+          rgba(155, 92, 255, 0.10),
+          transparent 45%
         );
 
-      color: white;
-
-      font-family:
-        Arial,
-        sans-serif;
+      z-index: 0;
     }
 
     .dashboard {
+      position: relative;
+      z-index: 1;
 
       width: 100%;
+      max-width: 520px;
 
-      max-width: 1100px;
+      margin: 0 auto;
 
-      margin: auto;
-
-      padding: 22px;
-
+      padding: 18px 16px 24px;
     }
 
-    /* TOP */
+    /* =========================
+       TOP BAR
+    ========================= */
 
     .top {
-
       display: flex;
+      align-items: center;
+      justify-content: space-between;
 
-      justify-content:
-        space-between;
+      gap: 12px;
+    }
 
-      align-items:
-        center;
-
-      gap: 15px;
-
+    .brand {
+      display: flex;
+      flex-direction: column;
     }
 
     .logo {
-
       font-size: 42px;
-
-      font-weight: bold;
-
-      letter-spacing: 5px;
+      font-weight: 900;
+      letter-spacing: 6px;
 
       background:
         linear-gradient(
           90deg,
-          #7d65ff,
-          #42c8ff
+          #8b5cff,
+          #c477ff,
+          #54c8ff
         );
 
-      -webkit-background-clip:
-        text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-      color:
-        transparent;
+    .tagline {
+      margin-top: 2px;
 
+      color: var(--muted);
+
+      font-size: 10px;
+      letter-spacing: 2px;
     }
 
     .online {
+      color: var(--green);
 
-      color:
-        #54e6bd;
+      font-size: 12px;
+      font-weight: bold;
 
-      font-size:
-        14px;
-
+      white-space: nowrap;
     }
 
-    /* GREETING */
+    /* =========================
+       GREETING
+    ========================= */
 
     .greeting {
+      margin-top: 18px;
 
-      margin-top:
-        20px;
+      padding: 18px;
 
-      padding:
-        22px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
 
-      border:
-        1px solid
-        #4b3d87;
+      background: var(--panel);
 
-      border-radius:
-        22px;
-
-      background:
-        rgba(
-          18,
-          15,
-          43,
-          0.8
-        );
-
+      box-shadow:
+        0 0 25px rgba(111, 56, 255, 0.08);
     }
 
     .greeting h2 {
-
-      font-size:
-        25px;
-
-      margin-bottom:
-        10px;
-
+      font-size: 22px;
+      margin-bottom: 7px;
     }
 
     .greeting p {
-
-      color:
-        #c6c3dc;
-
+      color: var(--muted);
+      font-size: 14px;
     }
 
-    /* MAIN */
-
-    .main {
-
-      display:
-        grid;
-
-      grid-template-columns:
-        1fr
-        1.5fr
-        1fr;
-
-      gap:
-        18px;
-
-      margin-top:
-        20px;
-
-    }
-
-    /* CARD */
-
-    .card {
-
-      padding:
-        20px;
-
-      border:
-        1px solid
-        #40346e;
-
-      border-radius:
-        22px;
-
-      background:
-        rgba(
-          13,
-          12,
-          32,
-          0.85
-        );
-
-      box-shadow:
-        0 0 25px
-        rgba(
-          117,
-          75,
-          255,
-          0.12
-        );
-
-    }
-
-    /* TAP */
-
-    .voice-circle {
-
-      width:
-        150px;
-
-      height:
-        150px;
-
-      margin:
-        15px auto;
-
-      border-radius:
-        50%;
-
-      display:
-        flex;
-
-      justify-content:
-        center;
-
-      align-items:
-        center;
-
-      font-size:
-        55px;
-
-      border:
-        5px solid
-        #8b61ff;
-
-      box-shadow:
-        0 0 25px
-        #6846e6;
-
-    }
-
-    .tap-text {
-
-      text-align:
-        center;
-
-      font-weight:
-        bold;
-
-      letter-spacing:
-        1px;
-
-    }
-
-    /* AVATAR */
+    /* =========================
+       AVATAR
+    ========================= */
 
     .avatar {
+      position: relative;
 
-      min-height:
-        510px;
+      width: 100%;
+      height: 430px;
 
-      display:
-        flex;
+      margin-top: 18px;
 
-      justify-content:
-        center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-      align-items:
-        center;
+      overflow: hidden;
 
-      border-radius:
-        30px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
 
-      border:
-        1px solid
-        #4b3d87;
+      background:
+        radial-gradient(
+          circle at center,
+          #25164b 0%,
+          #110b20 45%,
+          #07070d 100%
+        );
+
+      box-shadow:
+        0 0 35px rgba(111, 56, 255, 0.12);
+    }
+
+    .avatar::before {
+      content: "";
+
+      position: absolute;
+
+      width: 230px;
+      height: 230px;
+
+      border-radius: 50%;
 
       background:
         radial-gradient(
           circle,
-          #251950,
-          #080a18 70%
+          rgba(155, 92, 255, 0.25),
+          transparent 70%
         );
 
-      font-size:
-        25px;
-
-      color:
-        #9f91ff;
-
+      filter: blur(10px);
     }
 
-    /* OVERVIEW */
+    .avatar img {
+      position: relative;
+      z-index: 2;
 
-    .overview-item {
+      width: auto;
+      height: 98%;
 
-      display:
-        flex;
+      max-width: 100%;
 
-      justify-content:
-        space-between;
+      object-fit: contain;
 
-      padding:
-        16px 0;
-
-      border-bottom:
-        1px solid
-        #30274e;
-
+      filter:
+        drop-shadow(0 0 18px rgba(155, 92, 255, 0.30));
     }
 
-    /* MEMORY */
+    /* =========================
+       AI STATUS
+    ========================= */
+
+    .ai-status {
+      margin-top: 14px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      gap: 8px;
+
+      color: var(--muted);
+
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: var(--green);
+
+      box-shadow:
+        0 0 10px rgba(85, 230, 173, 0.8);
+    }
+
+    /* =========================
+       VOICE AREA
+    ========================= */
+
+    .voice-area {
+      margin-top: 18px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .voice-circle {
+      width: 105px;
+      height: 105px;
+
+      border: 3px solid var(--purple);
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          #35205f,
+          #120b20
+        );
+
+      color: white;
+
+      font-size: 40px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 0 25px rgba(155, 92, 255, 0.45);
+
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .voice-circle:active {
+      transform: scale(0.94);
+
+      box-shadow:
+        0 0 40px rgba(155, 92, 255, 0.75);
+    }
+
+    .tap-text {
+      margin-top: 10px;
+
+      color: #d7d0e8;
+
+      font-size: 12px;
+      font-weight: bold;
+
+      letter-spacing: 2px;
+    }
+
+    /* =========================
+       MEMORY
+    ========================= */
 
     .memory {
+      margin-top: 20px;
 
-      margin-top:
-        18px;
+      padding: 18px;
 
+      border: 1px solid var(--border);
+      border-radius: 20px;
+
+      background: var(--panel);
+    }
+
+    .section-title {
+      font-size: 15px;
+      letter-spacing: 1px;
+    }
+
+    .memory-label {
+      margin-top: 8px;
+
+      color: var(--purple-bright);
+
+      font-size: 12px;
+    }
+
+    .memory-text {
+      margin-top: 6px;
+
+      color: var(--muted);
+
+      font-size: 13px;
+      line-height: 1.5;
     }
 
     .progress {
+      width: 100%;
+      height: 7px;
 
-      width:
-        100%;
+      margin-top: 14px;
 
-      height:
-        8px;
+      overflow: hidden;
 
-      margin-top:
-        14px;
+      border-radius: 10px;
 
-      border-radius:
-        10px;
-
-      background:
-        #24213b;
-
+      background: #211a30;
     }
 
     .progress-fill {
+      width: 82%;
+      height: 100%;
 
-      width:
-        82%;
-
-      height:
-        100%;
-
-      border-radius:
-        10px;
+      border-radius: 10px;
 
       background:
         linear-gradient(
           90deg,
-          #8d5cff,
-          #c06cff
+          #7540ff,
+          #bd6cff
         );
-
     }
 
-    /* COMMAND */
+    .memory-percent {
+      margin-top: 7px;
+
+      text-align: right;
+
+      color: var(--muted);
+
+      font-size: 11px;
+    }
+
+    /* =========================
+       OVERVIEW
+    ========================= */
+
+    .overview {
+      margin-top: 18px;
+
+      padding: 18px;
+
+      border: 1px solid var(--border);
+      border-radius: 20px;
+
+      background: var(--panel);
+    }
+
+    .overview-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 13px 0;
+
+      border-bottom: 1px solid rgba(155, 92, 255, 0.12);
+
+      color: var(--muted);
+
+      font-size: 13px;
+    }
+
+    .overview-item:last-child {
+      border-bottom: none;
+    }
+
+    .overview-item b {
+      color: white;
+    }
+
+    /* =========================
+       COMMAND BAR
+    ========================= */
 
     .command {
+      display: flex;
+      align-items: center;
 
-      display:
-        flex;
+      gap: 10px;
 
-      gap:
-        12px;
+      margin-top: 18px;
 
-      margin-top:
-        20px;
+      padding: 9px;
 
-      padding:
-        12px;
+      border: 1px solid rgba(155, 92, 255, 0.40);
+      border-radius: 24px;
 
-      border:
-        1px solid
-        #6847c9;
+      background: rgba(15, 11, 27, 0.95);
 
-      border-radius:
-        25px;
-
-      background:
-        #111127;
-
+      box-shadow:
+        0 0 20px rgba(111, 56, 255, 0.08);
     }
 
     .command input {
+      flex: 1;
 
-      flex:
-        1;
+      min-width: 0;
 
-      border:
-        none;
+      padding: 12px;
 
-      outline:
-        none;
+      border: none;
+      outline: none;
 
-      background:
-        transparent;
+      background: transparent;
 
-      color:
-        white;
+      color: white;
 
-      font-size:
-        17px;
-
-      padding:
-        12px;
-
+      font-size: 14px;
     }
 
-    .mic {
-
-      width:
-        52px;
-
-      height:
-        52px;
-
-      border:
-        none;
-
-      border-radius:
-        50%;
-
-      font-size:
-        22px;
-
-      background:
-        #6846e6;
-
-      color:
-        white;
-
+    .command input::placeholder {
+      color: #777184;
     }
 
-    /* NAV */
+    .send {
+      width: 46px;
+      height: 46px;
+
+      flex-shrink: 0;
+
+      border: none;
+      border-radius: 50%;
+
+      background: var(--violet);
+
+      color: white;
+
+      font-size: 20px;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 0 15px rgba(111, 56, 255, 0.45);
+    }
+
+    .send:active {
+      transform: scale(0.94);
+    }
+
+    /* =========================
+       NAVIGATION
+    ========================= */
 
     .nav {
+      display: flex;
 
-      display:
-        flex;
+      justify-content: space-around;
+      align-items: center;
 
-      justify-content:
-        space-around;
+      gap: 4px;
 
-      margin-top:
-        18px;
+      margin-top: 18px;
 
-      padding:
-        18px;
+      padding: 14px 8px;
 
-      border:
-        1px solid
-        #3d3267;
+      border: 1px solid var(--border);
+      border-radius: 20px;
 
-      border-radius:
-        25px;
-
-      background:
-        #0d0d20;
-
+      background: rgba(13, 10, 23, 0.95);
     }
 
-    /* MOBILE */
+    .nav span {
+      color: #aaa4bc;
 
-    @media (
-      max-width: 800px
-    ) {
+      font-size: 10px;
 
-      .main {
+      text-align: center;
 
-        grid-template-columns:
-          1fr;
+      white-space: nowrap;
+    }
 
+    /* =========================
+       DESKTOP / TABLET
+    ========================= */
+
+    @media (min-width: 700px) {
+
+      .dashboard {
+        max-width: 1000px;
+        padding: 28px;
       }
 
       .avatar {
-
-        min-height:
-          420px;
-
+        height: 560px;
       }
 
       .logo {
-
-        font-size:
-          32px;
-
+        font-size: 48px;
       }
 
+      .voice-circle {
+        width: 120px;
+        height: 120px;
+      }
     }
 
-@media (max-width: 800px) {
-
-  .main {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .main > div {
-    width: 100%;
-  }
-
-  .avatar {
-    min-height: 420px;
-    width: 100%;
-    order: 1;
-  }
-
-  .main > div:first-child {
-    order: 2;
-  }
-
-  .main > div:last-child {
-    order: 3;
-  }
-
-      }
   </style>
-
 </head>
 
 
@@ -520,289 +565,222 @@
 
   <main class="dashboard">
 
-    <!-- TOP -->
+    <!-- =========================
+         TOP
+    ========================== -->
 
     <section class="top">
 
-      <div>
+      <div class="brand">
 
         <div class="logo">
-
-          VYRA
-
+          AV
         </div>
 
-        <small>
-
-          YOUR VOICE.
-          MY COMMAND.
-
-        </small>
+        <div class="tagline">
+          YOUR VOICE. MY COMMAND.
+        </div>
 
       </div>
 
       <div class="online">
-
         ● ONLINE
-
       </div>
 
     </section>
 
 
-    <!-- GREETING -->
+    <!-- =========================
+         GREETING
+    ========================== -->
 
     <section class="greeting">
 
       <h2>
-
-        Good Evening,
-        Boss 💜
-
+        Good Evening, Boss 💜
       </h2>
 
       <p>
-
-        I'm VYRA.
-        How can I assist
-        you today?
-
+        I'm AV. I'm listening.
       </p>
 
     </section>
 
 
-    <!-- MAIN -->
-
-    <section class="main">
-
-
-      <!-- LEFT -->
-
-      <div>
-
-        <div class="card">
-
-          <div
-            class="voice-circle"
-          >
-
-            🎙️
-          </div>
-
-          <div class="tap-text">
-            TAP TO SPEAK
-          </div>
-
-        </div>
-
-
-        <div class="card" style="margin-top:18px;">
-
-          <h3>AI STATUS</h3>
-
-          <br>
-
-          <p>STANDBY</p>
-
-        </div>
-
-
-        <div class="card memory">
-
-          <h3>MEMORY CORE</h3>
-
-          <br>
-
-          <p>
-            All your memories
-            are safe with me.
-          </p>
-
-          <div class="progress">
-
-            <div class="progress-fill">
-
-            </div>
-
-          </div>
-
-          <br>
-
-          <p>82%</p>
-
-        </div>
-
-      </div>
-
-
-      <!-- VYRA AVATAR -->
-
-      <div class="avatar">
-
-        VYRA AVATAR
-
-      </div>
-
-
-      <!-- RIGHT SIDE -->
-
-      <div>
-
-
-        <div class="card">
-
-          <h3>
-            TODAY'S OVERVIEW
-          </h3>
-
-
-          <div class="overview-item">
-
-            <span>
-              Tasks Completed
-            </span>
-
-            <b>12</b>
-
-          </div>
-
-
-          <div class="overview-item">
-
-            <span>
-              Time Saved
-            </span>
-
-            <b>3.6 hrs</b>
-
-          </div>
-
-
-          <div class="overview-item">
-
-            <span>
-              Accuracy
-            </span>
-
-            <b>98.7%</b>
-
-          </div>
-
-
-          <div class="overview-item">
-
-            <span>
-              New Messages
-            </span>
-
-            <b>5</b>
-
-          </div>
-
-        </div>
-
-
-        <div
-          class="card"
-          style="margin-top:18px;"
-        >
-
-          <p>
-
-            “I'm more than
-            an assistant,
-
-            <br><br>
-
-            I'm your partner
-            in everything.”
-
-          </p>
-
-          <br>
-
-          <p>
-            — VYRA 💜
-          </p>
-
-        </div>
-
-
-      </div>
-
+    <!-- =========================
+         AVATAR
+    ========================== -->
+
+    <section class="avatar">
+
+      <img
+        src="av-avatar.png"
+        alt="AV AI Assistant"
+      >
 
     </section>
 
 
-    <!-- COMMAND BAR -->
+    <!-- =========================
+         STATUS
+    ========================== -->
+
+    <div class="ai-status">
+
+      <span class="status-dot"></span>
+
+      <p>
+        STANDBY
+      </p>
+
+    </div>
+
+
+    <!-- =========================
+         TAP TO SPEAK
+    ========================== -->
+
+    <section class="voice-area">
+
+      <button
+        class="voice-circle mic"
+        type="button"
+        aria-label="Tap to speak"
+      >
+        🎙️
+      </button>
+
+      <div class="tap-text">
+        TAP TO SPEAK
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         MEMORY CORE
+    ========================== -->
+
+    <section class="memory">
+
+      <h3 class="section-title">
+        MEMORY CORE
+      </h3>
+
+      <div class="memory-label">
+        ACTIVE
+      </div>
+
+      <p class="memory-text">
+        All your memories are safe with me.
+      </p>
+
+      <div class="progress">
+
+        <div class="progress-fill"></div>
+
+      </div>
+
+      <div class="memory-percent">
+        82%
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         TODAY'S OVERVIEW
+    ========================== -->
+
+    <section class="overview">
+
+      <h3 class="section-title">
+        TODAY'S OVERVIEW
+      </h3>
+
+      <div class="overview-item">
+        <span>Tasks Completed</span>
+        <b>12</b>
+      </div>
+
+      <div class="overview-item">
+        <span>Time Saved</span>
+        <b>3.6 hrs</b>
+      </div>
+
+      <div class="overview-item">
+        <span>Accuracy</span>
+        <b>98.7%</b>
+      </div>
+
+      <div class="overview-item">
+        <span>New Messages</span>
+        <b>5</b>
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         COMMAND
+    ========================== -->
 
     <section class="command">
 
-  <input
-    type="text"
-    placeholder="Type your command..."
-  >
+      <input
+        type="text"
+        placeholder="Type your command..."
+        aria-label="Command"
+      >
 
-  <button
-    class="mic"
-    type="button"
-    aria-label="Voice input"
-  >
-    🎤
-  </button>
-
-  <button
-    class="send"
-    type="button"
-    aria-label="Send message"
-  >
-    ➤
-  </button>
+      <button
+        class="send"
+        type="button"
+        aria-label="Send message"
+      >
+        ➤
+      </button>
 
     </section>
-    
 
 
-    <!-- BOTTOM NAVIGATION -->
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
 
     <nav class="nav">
 
-      <span>
-        🏠 Home
-      </span>
+      <span>🏠 Home</span>
 
-      <span>
-        💬 Chat
-      </span>
+      <span>💬 Chat</span>
 
-      <span>
-        🕘 History
-      </span>
+      <span>🕘 History</span>
 
-      <span>
-        ⚙️ Settings
-      </span>
+      <span>⚙️ Settings</span>
 
-      <span>
-        👤 Profile
-      </span>
+      <span>👤 Profile</span>
 
     </nav>
-
 
   </main>
 
 
-  <!-- VYRA AI FILES -->
+  <!-- =========================
+       AV AGENTS
+  ========================== -->
 
   <script src="memory-agent.js"></script>
+
   <script src="chat-agent.js?v=3"></script>
+
   <script src="language-agent.js"></script>
+
   <script src="agents/story-agent.js"></script>
+
   <script src="master-core.js"></script>
+
   <script src="app.js"></script>
 
 </body>
 
-            </html>
+  </html>
