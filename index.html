@@ -15,20 +15,17 @@
     }
 
     :root {
-      --bg: #050509;
-      --panel: rgba(18, 13, 31, 0.82);
-      --panel-light: rgba(31, 20, 51, 0.72);
-
+      --bg: #03040b;
       --purple: #9b5cff;
-      --purple-bright: #bd7aff;
-      --violet: #6f38ff;
-
-      --text: #ffffff;
-      --muted: #aaa4bc;
-
+      --purple-bright: #c77dff;
+      --blue: #3d8bff;
+      --cyan: #50d9ff;
       --green: #55e6ad;
 
-      --border: rgba(155, 92, 255, 0.28);
+      --text: #ffffff;
+      --muted: #aaa8bd;
+
+      --border: rgba(155, 92, 255, 0.25);
     }
 
     html,
@@ -45,26 +42,54 @@
       overflow-x: hidden;
     }
 
+    /* =========================================
+       BACKGROUND
+    ========================================= */
+
     body::before {
       content: "";
       position: fixed;
       inset: 0;
+
       pointer-events: none;
 
       background:
         radial-gradient(
-          circle at 50% 20%,
-          rgba(111, 56, 255, 0.20),
+          circle at 50% 35%,
+          rgba(111, 56, 255, 0.18),
           transparent 38%
         ),
         radial-gradient(
-          circle at 50% 70%,
-          rgba(155, 92, 255, 0.10),
+          circle at 50% 80%,
+          rgba(61, 139, 255, 0.08),
           transparent 45%
         );
 
       z-index: 0;
     }
+
+    body::after {
+      content: "";
+
+      position: fixed;
+      inset: 0;
+
+      pointer-events: none;
+
+      background:
+        linear-gradient(
+          180deg,
+          transparent 0%,
+          rgba(120, 70, 255, 0.025) 50%,
+          transparent 100%
+        );
+
+      z-index: 0;
+    }
+
+    /* =========================================
+       MAIN CONTAINER
+    ========================================= */
 
     .dashboard {
       position: relative;
@@ -75,12 +100,12 @@
 
       margin: 0 auto;
 
-      padding: 18px 16px 24px;
+      padding: 18px 16px 28px;
     }
 
-    /* =========================
+    /* =========================================
        TOP BAR
-    ========================= */
+    ========================================= */
 
     .top {
       display: flex;
@@ -98,6 +123,7 @@
     .logo {
       font-size: 42px;
       font-weight: 900;
+
       letter-spacing: 6px;
 
       background:
@@ -117,7 +143,8 @@
 
       color: var(--muted);
 
-      font-size: 10px;
+      font-size: 9px;
+
       letter-spacing: 2px;
     }
 
@@ -128,47 +155,54 @@
       font-weight: bold;
 
       white-space: nowrap;
+
+      text-shadow:
+        0 0 10px rgba(85, 230, 173, 0.4);
     }
 
-    /* =========================
+    /* =========================================
        GREETING
-    ========================= */
+    ========================================= */
 
     .greeting {
       margin-top: 18px;
 
-      padding: 18px;
+      padding: 16px 18px;
 
       border: 1px solid var(--border);
       border-radius: 20px;
 
-      background: var(--panel);
+      background: rgba(15, 11, 28, 0.72);
+
+      backdrop-filter: blur(12px);
 
       box-shadow:
-        0 0 25px rgba(111, 56, 255, 0.08);
+        0 0 25px rgba(111, 56, 255, 0.06);
     }
 
     .greeting h2 {
-      font-size: 22px;
-      margin-bottom: 7px;
+      font-size: 20px;
+
+      margin-bottom: 6px;
     }
 
     .greeting p {
       color: var(--muted);
-      font-size: 14px;
+
+      font-size: 13px;
     }
 
-    /* =========================
-       AVATAR
-    ========================= */
+    /* =========================================
+       AV CORE AREA
+    ========================================= */
 
-    .avatar {
+    .core-section {
       position: relative;
 
       width: 100%;
       height: 430px;
 
-      margin-top: 18px;
+      margin-top: 16px;
 
       display: flex;
       align-items: center;
@@ -177,58 +211,228 @@
       overflow: hidden;
 
       border: 1px solid var(--border);
-      border-radius: 28px;
+      border-radius: 30px;
 
       background:
         radial-gradient(
           circle at center,
-          #25164b 0%,
-          #110b20 45%,
-          #07070d 100%
+          rgba(46, 25, 87, 0.72),
+          rgba(10, 7, 20, 0.94) 55%,
+          #03040b 100%
         );
 
       box-shadow:
-        0 0 35px rgba(111, 56, 255, 0.12);
+        inset 0 0 50px rgba(111, 56, 255, 0.08),
+        0 0 35px rgba(111, 56, 255, 0.10);
     }
 
-    .avatar::before {
-      content: "";
+    /* =========================================
+       CORE GLOW
+    ========================================= */
 
+    .av-core {
+      position: relative;
+
+      width: 220px;
+      height: 220px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+
+      border-radius: 50%;
+    }
+
+    .core-glow {
       position: absolute;
 
-      width: 230px;
-      height: 230px;
+      width: 190px;
+      height: 190px;
 
       border-radius: 50%;
 
       background:
         radial-gradient(
           circle,
-          rgba(155, 92, 255, 0.25),
-          transparent 70%
+          rgba(155, 92, 255, 0.42),
+          rgba(61, 139, 255, 0.14) 45%,
+          transparent 72%
         );
 
-      filter: blur(10px);
+      filter: blur(14px);
+
+      animation: coreGlow 3s ease-in-out infinite;
     }
 
-    .avatar img {
+    /* =========================================
+       CORE RINGS
+    ========================================= */
+
+    .core-ring {
+      position: absolute;
+
+      border-radius: 50%;
+
+      border: 2px solid transparent;
+    }
+
+    .ring-one {
+      width: 170px;
+      height: 170px;
+
+      border-top-color: #c06cff;
+      border-right-color: #6e42ff;
+
+      box-shadow:
+        0 0 18px rgba(155, 92, 255, 0.65);
+
+      animation:
+        rotateClockwise 7s linear infinite;
+    }
+
+    .ring-two {
+      width: 200px;
+      height: 200px;
+
+      border-bottom-color: #4f9dff;
+      border-left-color: #9b5cff;
+
+      box-shadow:
+        0 0 20px rgba(61, 139, 255, 0.45);
+
+      animation:
+        rotateCounter 10s linear infinite;
+    }
+
+    .ring-three {
+      width: 228px;
+      height: 228px;
+
+      border-top-color: rgba(80, 217, 255, 0.65);
+      border-bottom-color: rgba(199, 125, 255, 0.55);
+
+      opacity: 0.65;
+
+      animation:
+        rotateClockwise 15s linear infinite;
+    }
+
+    /* =========================================
+       INNER CORE
+    ========================================= */
+
+    .core-inner {
       position: relative;
-      z-index: 2;
+      z-index: 5;
 
-      width: auto;
-      height: 98%;
+      width: 112px;
+      height: 112px;
 
-      max-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-      object-fit: contain;
+      border-radius: 50%;
 
-      filter:
-        drop-shadow(0 0 18px rgba(155, 92, 255, 0.30));
+      background:
+        radial-gradient(
+          circle at 35% 30%,
+          #3b2267,
+          #120b24 70%
+        );
+
+      border: 2px solid rgba(196, 125, 255, 0.85);
+
+      box-shadow:
+        0 0 25px rgba(155, 92, 255, 0.7),
+        inset 0 0 25px rgba(155, 92, 255, 0.20);
+
+      animation: coreBreath 3s ease-in-out infinite;
     }
 
-    /* =========================
-       AI STATUS
-    ========================= */
+    .core-logo {
+      font-size: 43px;
+
+      font-weight: 900;
+
+      letter-spacing: 2px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #ffffff,
+          #c77dff,
+          #58cfff
+        );
+
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      text-shadow:
+        0 0 20px rgba(183, 113, 255, 0.45);
+    }
+
+    /* =========================================
+       PARTICLES
+    ========================================= */
+
+    .particle {
+      position: absolute;
+
+      width: 4px;
+      height: 4px;
+
+      border-radius: 50%;
+
+      background: #b878ff;
+
+      box-shadow:
+        0 0 10px #9b5cff;
+
+      animation: particleFloat 4s ease-in-out infinite;
+    }
+
+    .p1 {
+      top: 25%;
+      left: 23%;
+      animation-delay: 0s;
+    }
+
+    .p2 {
+      top: 18%;
+      right: 28%;
+      animation-delay: 1s;
+    }
+
+    .p3 {
+      bottom: 27%;
+      left: 28%;
+      animation-delay: 2s;
+    }
+
+    .p4 {
+      bottom: 20%;
+      right: 24%;
+      animation-delay: 0.5s;
+    }
+
+    .p5 {
+      top: 48%;
+      left: 15%;
+      animation-delay: 1.5s;
+    }
+
+    .p6 {
+      top: 55%;
+      right: 15%;
+      animation-delay: 2.5s;
+    }
+
+    /* =========================================
+       CORE STATUS
+    ========================================= */
 
     .ai-status {
       margin-top: 14px;
@@ -241,25 +445,44 @@
 
       color: var(--muted);
 
-      font-size: 12px;
+      font-size: 11px;
+
       letter-spacing: 2px;
     }
 
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
 
       border-radius: 50%;
 
       background: var(--green);
 
       box-shadow:
-        0 0 10px rgba(85, 230, 173, 0.8);
+        0 0 10px rgba(85, 230, 173, 0.9);
+
+      animation: statusPulse 2s ease-in-out infinite;
     }
 
-    /* =========================
-       VOICE AREA
-    ========================= */
+    /* =========================================
+       CORE HINT
+    ========================================= */
+
+    .core-hint {
+      margin-top: 7px;
+
+      text-align: center;
+
+      color: #777184;
+
+      font-size: 11px;
+
+      letter-spacing: 1px;
+    }
+
+    /* =========================================
+       VOICE BUTTON
+    ========================================= */
 
     .voice-area {
       margin-top: 18px;
@@ -270,23 +493,23 @@
     }
 
     .voice-circle {
-      width: 105px;
-      height: 105px;
+      width: 70px;
+      height: 70px;
 
-      border: 3px solid var(--purple);
+      border: 2px solid rgba(155, 92, 255, 0.75);
 
       border-radius: 50%;
 
       background:
         radial-gradient(
           circle,
-          #35205f,
-          #120b20
+          #34205e,
+          #10091d
         );
 
       color: white;
 
-      font-size: 40px;
+      font-size: 27px;
 
       display: flex;
       align-items: center;
@@ -295,7 +518,7 @@
       cursor: pointer;
 
       box-shadow:
-        0 0 25px rgba(155, 92, 255, 0.45);
+        0 0 20px rgba(155, 92, 255, 0.4);
 
       transition:
         transform 0.2s ease,
@@ -303,65 +526,72 @@
     }
 
     .voice-circle:active {
-      transform: scale(0.94);
+      transform: scale(0.93);
 
       box-shadow:
-        0 0 40px rgba(155, 92, 255, 0.75);
+        0 0 35px rgba(155, 92, 255, 0.8);
     }
 
     .tap-text {
-      margin-top: 10px;
+      margin-top: 9px;
 
-      color: #d7d0e8;
+      color: #c9c2dc;
 
-      font-size: 12px;
+      font-size: 10px;
+
       font-weight: bold;
 
       letter-spacing: 2px;
     }
 
-    /* =========================
-       MEMORY
-    ========================= */
+    /* =========================================
+       MEMORY CORE
+    ========================================= */
 
     .memory {
       margin-top: 20px;
 
-      padding: 18px;
+      padding: 17px;
 
       border: 1px solid var(--border);
+
       border-radius: 20px;
 
-      background: var(--panel);
+      background:
+        rgba(15, 11, 28, 0.75);
+
+      backdrop-filter: blur(10px);
     }
 
     .section-title {
-      font-size: 15px;
+      font-size: 14px;
+
       letter-spacing: 1px;
     }
 
     .memory-label {
-      margin-top: 8px;
+      margin-top: 7px;
 
       color: var(--purple-bright);
 
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .memory-text {
-      margin-top: 6px;
+      margin-top: 5px;
 
       color: var(--muted);
 
-      font-size: 13px;
+      font-size: 12px;
+
       line-height: 1.5;
     }
 
     .progress {
       width: 100%;
-      height: 7px;
+      height: 6px;
 
-      margin-top: 14px;
+      margin-top: 13px;
 
       overflow: hidden;
 
@@ -385,73 +615,38 @@
     }
 
     .memory-percent {
-      margin-top: 7px;
+      margin-top: 6px;
 
       text-align: right;
 
       color: var(--muted);
 
-      font-size: 11px;
+      font-size: 10px;
     }
 
-    /* =========================
-       OVERVIEW
-    ========================= */
-
-    .overview {
-      margin-top: 18px;
-
-      padding: 18px;
-
-      border: 1px solid var(--border);
-      border-radius: 20px;
-
-      background: var(--panel);
-    }
-
-    .overview-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      padding: 13px 0;
-
-      border-bottom: 1px solid rgba(155, 92, 255, 0.12);
-
-      color: var(--muted);
-
-      font-size: 13px;
-    }
-
-    .overview-item:last-child {
-      border-bottom: none;
-    }
-
-    .overview-item b {
-      color: white;
-    }
-
-    /* =========================
+    /* =========================================
        COMMAND BAR
-    ========================= */
+    ========================================= */
 
     .command {
       display: flex;
       align-items: center;
 
-      gap: 10px;
+      gap: 8px;
 
       margin-top: 18px;
 
-      padding: 9px;
+      padding: 8px;
 
-      border: 1px solid rgba(155, 92, 255, 0.40);
+      border: 1px solid rgba(155, 92, 255, 0.38);
+
       border-radius: 24px;
 
-      background: rgba(15, 11, 27, 0.95);
+      background:
+        rgba(12, 9, 23, 0.95);
 
       box-shadow:
-        0 0 20px rgba(111, 56, 255, 0.08);
+        0 0 20px rgba(111, 56, 255, 0.07);
     }
 
     .command input {
@@ -459,7 +654,7 @@
 
       min-width: 0;
 
-      padding: 12px;
+      padding: 11px;
 
       border: none;
       outline: none;
@@ -468,7 +663,7 @@
 
       color: white;
 
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .command input::placeholder {
@@ -476,19 +671,25 @@
     }
 
     .send {
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
 
       flex-shrink: 0;
 
       border: none;
+
       border-radius: 50%;
 
-      background: var(--violet);
+      background:
+        linear-gradient(
+          135deg,
+          #7040ff,
+          #8e50ff
+        );
 
       color: white;
 
-      font-size: 20px;
+      font-size: 19px;
 
       cursor: pointer;
 
@@ -500,9 +701,9 @@
       transform: scale(0.94);
     }
 
-    /* =========================
+    /* =========================================
        NAVIGATION
-    ========================= */
+    ========================================= */
 
     .nav {
       display: flex;
@@ -514,12 +715,14 @@
 
       margin-top: 18px;
 
-      padding: 14px 8px;
+      padding: 13px 7px;
 
       border: 1px solid var(--border);
+
       border-radius: 20px;
 
-      background: rgba(13, 10, 23, 0.95);
+      background:
+        rgba(10, 8, 18, 0.94);
     }
 
     .nav span {
@@ -532,28 +735,102 @@
       white-space: nowrap;
     }
 
-    /* =========================
-       DESKTOP / TABLET
-    ========================= */
+    /* =========================================
+       ANIMATIONS
+    ========================================= */
+
+    @keyframes rotateClockwise {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes rotateCounter {
+      from {
+        transform: rotate(360deg);
+      }
+
+      to {
+        transform: rotate(0deg);
+      }
+    }
+
+    @keyframes coreBreath {
+      0%,
+      100% {
+        transform: scale(0.96);
+      }
+
+      50% {
+        transform: scale(1.04);
+      }
+    }
+
+    @keyframes coreGlow {
+      0%,
+      100% {
+        opacity: 0.65;
+        transform: scale(0.92);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.08);
+      }
+    }
+
+    @keyframes particleFloat {
+      0%,
+      100% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0.4;
+      }
+
+      50% {
+        transform: translateY(-14px) scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    @keyframes statusPulse {
+      0%,
+      100% {
+        opacity: 0.5;
+        transform: scale(0.85);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.15);
+      }
+    }
+
+    /* =========================================
+       TABLET / DESKTOP
+    ========================================= */
 
     @media (min-width: 700px) {
 
       .dashboard {
-        max-width: 1000px;
+        max-width: 760px;
+
         padding: 28px;
       }
 
-      .avatar {
-        height: 560px;
+      .core-section {
+        height: 520px;
+      }
+
+      .av-core {
+        transform: scale(1.15);
       }
 
       .logo {
         font-size: 48px;
-      }
-
-      .voice-circle {
-        width: 120px;
-        height: 120px;
       }
     }
 
@@ -565,9 +842,9 @@
 
   <main class="dashboard">
 
-    <!-- =========================
+    <!-- =====================================
          TOP
-    ========================== -->
+    ====================================== -->
 
     <section class="top">
 
@@ -584,15 +861,15 @@
       </div>
 
       <div class="online">
-        ● ONLINE
+        ● AV ONLINE
       </div>
 
     </section>
 
 
-    <!-- =========================
+    <!-- =====================================
          GREETING
-    ========================== -->
+    ====================================== -->
 
     <section class="greeting">
 
@@ -601,29 +878,56 @@
       </h2>
 
       <p>
-        I'm AV. I'm listening.
+        I'm AV. I'm here.
       </p>
 
     </section>
 
 
-    <!-- =========================
-         AVATAR
-    ========================== -->
+    <!-- =====================================
+         AV CORE
+    ====================================== -->
 
-    <section class="avatar">
+    <section class="core-section">
 
-      <img
-        src="av-avatar.png"
-        alt="AV AI Assistant"
+      <div
+        class="av-core"
+        aria-label="AV Core"
       >
+
+        <div class="core-glow"></div>
+
+        <div class="core-ring ring-one"></div>
+
+        <div class="core-ring ring-two"></div>
+
+        <div class="core-ring ring-three"></div>
+
+        <div class="core-inner">
+
+          <div class="core-logo">
+            AV
+          </div>
+
+        </div>
+
+        <!-- Floating particles -->
+
+        <span class="particle p1"></span>
+        <span class="particle p2"></span>
+        <span class="particle p3"></span>
+        <span class="particle p4"></span>
+        <span class="particle p5"></span>
+        <span class="particle p6"></span>
+
+      </div>
 
     </section>
 
 
-    <!-- =========================
+    <!-- =====================================
          STATUS
-    ========================== -->
+    ====================================== -->
 
     <div class="ai-status">
 
@@ -635,10 +939,14 @@
 
     </div>
 
+    <div class="core-hint">
+      Ready when you are...
+    </div>
 
-    <!-- =========================
-         TAP TO SPEAK
-    ========================== -->
+
+    <!-- =====================================
+         VOICE
+    ====================================== -->
 
     <section class="voice-area">
 
@@ -657,9 +965,9 @@
     </section>
 
 
-    <!-- =========================
+    <!-- =====================================
          MEMORY CORE
-    ========================== -->
+    ====================================== -->
 
     <section class="memory">
 
@@ -688,42 +996,9 @@
     </section>
 
 
-    <!-- =========================
-         TODAY'S OVERVIEW
-    ========================== -->
-
-    <section class="overview">
-
-      <h3 class="section-title">
-        TODAY'S OVERVIEW
-      </h3>
-
-      <div class="overview-item">
-        <span>Tasks Completed</span>
-        <b>12</b>
-      </div>
-
-      <div class="overview-item">
-        <span>Time Saved</span>
-        <b>3.6 hrs</b>
-      </div>
-
-      <div class="overview-item">
-        <span>Accuracy</span>
-        <b>98.7%</b>
-      </div>
-
-      <div class="overview-item">
-        <span>New Messages</span>
-        <b>5</b>
-      </div>
-
-    </section>
-
-
-    <!-- =========================
+    <!-- =====================================
          COMMAND
-    ========================== -->
+    ====================================== -->
 
     <section class="command">
 
@@ -744,9 +1019,9 @@
     </section>
 
 
-    <!-- =========================
+    <!-- =====================================
          NAVIGATION
-    ========================== -->
+    ====================================== -->
 
     <nav class="nav">
 
@@ -765,9 +1040,9 @@
   </main>
 
 
-  <!-- =========================
+  <!-- =====================================
        AV AGENTS
-  ========================== -->
+  ====================================== -->
 
   <script src="memory-agent.js"></script>
 
