@@ -65,19 +65,20 @@ export default async function handler(req, res) {
     );
 
     if (!elevenResponse.ok) {
-      const errorText = await elevenResponse.text();
+  const errorText = await elevenResponse.text();
 
-      console.error(
-        "AV TTS → ElevenLabs Error:",
-        elevenResponse.status,
-        errorText
-      );
+  console.error(
+    "AV TTS → ElevenLabs Error:",
+    elevenResponse.status,
+    errorText
+  );
 
-      return res.status(elevenResponse.status).json({
-        error: "ElevenLabs voice generation failed."
-      });
-    }
-
+  return res.status(elevenResponse.status).json({
+    error: "ElevenLabs voice generation failed.",
+    status: elevenResponse.status,
+    details: errorText
+  });
+          }
     const audioBuffer = Buffer.from(
       await elevenResponse.arrayBuffer()
     );
