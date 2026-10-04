@@ -3,11 +3,19 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
 
   <title>AV — AI Assistant</title>
 
   <style>
+
+    /* =========================================
+       RESET
+    ========================================= */
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -15,17 +23,21 @@
     }
 
     :root {
-      --bg: #03040b;
-      --purple: #9b5cff;
-      --purple-bright: #c77dff;
-      --blue: #3d8bff;
-      --cyan: #50d9ff;
-      --green: #55e6ad;
+      --bg: #02040c;
 
-      --text: #ffffff;
-      --muted: #aaa8bd;
+      --violet: #8d45ff;
+      --purple: #b65cff;
+      --pink: #e56cff;
 
-      --border: rgba(155, 92, 255, 0.25);
+      --blue: #3f7dff;
+      --cyan: #35d9ff;
+
+      --green: #27e6a5;
+
+      --white: #ffffff;
+      --muted: #9295b2;
+
+      --glass: rgba(8, 12, 30, 0.72);
     }
 
     html,
@@ -37,10 +49,12 @@
 
     body {
       min-height: 100vh;
-      color: var(--text);
-      font-family: Arial, sans-serif;
+      color: var(--white);
+      font-family: Arial, Helvetica, sans-serif;
       overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
     }
+
 
     /* =========================================
        BACKGROUND
@@ -48,6 +62,7 @@
 
     body::before {
       content: "";
+
       position: fixed;
       inset: 0;
 
@@ -55,18 +70,19 @@
 
       background:
         radial-gradient(
-          circle at 50% 35%,
-          rgba(111, 56, 255, 0.18),
-          transparent 38%
+          circle at 50% 38%,
+          rgba(93, 55, 255, 0.18),
+          transparent 30%
         ),
         radial-gradient(
-          circle at 50% 80%,
-          rgba(61, 139, 255, 0.08),
-          transparent 45%
+          circle at 50% 75%,
+          rgba(30, 120, 255, 0.09),
+          transparent 42%
         );
 
       z-index: 0;
     }
+
 
     body::after {
       content: "";
@@ -78,304 +94,375 @@
 
       background:
         linear-gradient(
-          180deg,
-          transparent 0%,
-          rgba(120, 70, 255, 0.025) 50%,
-          transparent 100%
+          115deg,
+          transparent 25%,
+          rgba(86, 74, 255, 0.025),
+          transparent 75%
         );
 
       z-index: 0;
     }
 
+
     /* =========================================
-       MAIN CONTAINER
+       MAIN APP
     ========================================= */
 
-    .dashboard {
+    .app {
       position: relative;
       z-index: 1;
 
       width: 100%;
+      min-height: 100vh;
+
       max-width: 520px;
 
       margin: 0 auto;
 
-      padding: 18px 16px 28px;
+      padding:
+        16px
+        16px
+        calc(22px + env(safe-area-inset-bottom));
     }
+
 
     /* =========================================
        TOP BAR
     ========================================= */
 
-    .top {
-      display: flex;
+    .topbar {
+      height: 52px;
+
+      display: grid;
+
+      grid-template-columns: 48px 1fr 48px;
+
       align-items: center;
-      justify-content: space-between;
 
-      gap: 12px;
+      position: relative;
+      z-index: 20;
     }
 
-    .brand {
-      display: flex;
-      flex-direction: column;
-    }
 
-    .logo {
-      font-size: 42px;
-      font-weight: 900;
+    .top-button {
+      width: 42px;
+      height: 42px;
 
-      letter-spacing: 6px;
+      border: 1px solid rgba(120, 115, 255, 0.18);
+
+      border-radius: 50%;
 
       background:
-        linear-gradient(
-          90deg,
-          #8b5cff,
-          #c477ff,
-          #54c8ff
-        );
+        rgba(10, 13, 30, 0.62);
 
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .tagline {
-      margin-top: 2px;
-
-      color: var(--muted);
-
-      font-size: 9px;
-
-      letter-spacing: 2px;
-    }
-
-    .online {
-      color: var(--green);
-
-      font-size: 12px;
-      font-weight: bold;
-
-      white-space: nowrap;
-
-      text-shadow:
-        0 0 10px rgba(85, 230, 173, 0.4);
-    }
-
-    /* =========================================
-       GREETING
-    ========================================= */
-
-    .greeting {
-      margin-top: 18px;
-
-      padding: 16px 18px;
-
-      border: 1px solid var(--border);
-      border-radius: 20px;
-
-      background: rgba(15, 11, 28, 0.72);
-
-      backdrop-filter: blur(12px);
-
-      box-shadow:
-        0 0 25px rgba(111, 56, 255, 0.06);
-    }
-
-    .greeting h2 {
-      font-size: 20px;
-
-      margin-bottom: 6px;
-    }
-
-    .greeting p {
-      color: var(--muted);
-
-      font-size: 13px;
-    }
-
-    /* =========================================
-       AV CORE AREA
-    ========================================= */
-
-    .core-section {
-      position: relative;
-
-      width: 100%;
-      height: 430px;
-
-      margin-top: 16px;
+      color: #d9ddff;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      overflow: hidden;
-
-      border: 1px solid var(--border);
-      border-radius: 30px;
-
-      background:
-        radial-gradient(
-          circle at center,
-          rgba(46, 25, 87, 0.72),
-          rgba(10, 7, 20, 0.94) 55%,
-          #03040b 100%
-        );
-
-      box-shadow:
-        inset 0 0 50px rgba(111, 56, 255, 0.08),
-        0 0 35px rgba(111, 56, 255, 0.10);
-    }
-
-    /* =========================================
-       CORE GLOW
-    ========================================= */
-
-    .av-core {
-      position: relative;
-
-      width: 220px;
-      height: 220px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 21px;
 
       cursor: pointer;
 
-      border-radius: 50%;
+      backdrop-filter: blur(10px);
     }
 
-    .core-glow {
+
+    .top-button:active {
+      transform: scale(0.92);
+    }
+
+
+    .top-brand {
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      justify-content: center;
+    }
+
+
+    /* =========================================
+       FUTURISTIC AV LOGO
+    ========================================= */
+
+    .av-logo {
+      width: 62px;
+      height: 34px;
+
+      display: block;
+
+      filter:
+        drop-shadow(0 0 7px rgba(168, 85, 255, 0.75))
+        drop-shadow(0 0 15px rgba(55, 150, 255, 0.35));
+    }
+
+
+    .brand-subtitle {
+      margin-top: 1px;
+
+      color: #9fa5d0;
+
+      font-size: 7px;
+
+      letter-spacing: 3px;
+
+      font-weight: 600;
+    }
+
+
+    /* =========================================
+       CORE STAGE
+    ========================================= */
+
+    .core-stage {
+      position: relative;
+
+      width: 100%;
+
+      height: 480px;
+
+      margin-top: 5px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      overflow: hidden;
+    }
+
+
+    /* soft center light */
+
+    .stage-glow {
       position: absolute;
 
-      width: 190px;
-      height: 190px;
+      width: 330px;
+      height: 330px;
 
       border-radius: 50%;
 
       background:
         radial-gradient(
           circle,
-          rgba(155, 92, 255, 0.42),
-          rgba(61, 139, 255, 0.14) 45%,
+          rgba(121, 56, 255, 0.22),
+          rgba(36, 114, 255, 0.08) 40%,
           transparent 72%
         );
 
-      filter: blur(14px);
+      filter: blur(18px);
 
-      animation: coreGlow 3s ease-in-out infinite;
+      animation:
+        stageBreath 4s ease-in-out infinite;
     }
 
+
     /* =========================================
-       CORE RINGS
+       CORE
     ========================================= */
 
-    .core-ring {
+    .av-core {
+      position: relative;
+
+      width: 300px;
+      height: 300px;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+
+      user-select: none;
+    }
+
+
+    /* =========================================
+       ENERGY RINGS
+    ========================================= */
+
+    .energy {
       position: absolute;
 
       border-radius: 50%;
 
-      border: 2px solid transparent;
+      pointer-events: none;
     }
 
-    .ring-one {
-      width: 170px;
-      height: 170px;
 
-      border-top-color: #c06cff;
-      border-right-color: #6e42ff;
+    .energy-one {
+      width: 205px;
+      height: 205px;
+
+      border:
+        2px solid transparent;
+
+      border-top-color: var(--pink);
+      border-right-color: var(--purple);
 
       box-shadow:
-        0 0 18px rgba(155, 92, 255, 0.65);
+        0 0 12px rgba(221, 99, 255, 0.75),
+        inset 0 0 8px rgba(155, 70, 255, 0.20);
 
       animation:
-        rotateClockwise 7s linear infinite;
+        spin 7s linear infinite;
     }
 
-    .ring-two {
-      width: 200px;
-      height: 200px;
 
-      border-bottom-color: #4f9dff;
-      border-left-color: #9b5cff;
+    .energy-two {
+      width: 235px;
+      height: 235px;
+
+      border:
+        2px solid transparent;
+
+      border-left-color: var(--cyan);
+      border-bottom-color: var(--blue);
 
       box-shadow:
-        0 0 20px rgba(61, 139, 255, 0.45);
+        0 0 13px rgba(50, 170, 255, 0.65);
 
       animation:
-        rotateCounter 10s linear infinite;
+        spinReverse 9s linear infinite;
     }
 
-    .ring-three {
-      width: 228px;
-      height: 228px;
 
-      border-top-color: rgba(80, 217, 255, 0.65);
-      border-bottom-color: rgba(199, 125, 255, 0.55);
+    .energy-three {
+      width: 270px;
+      height: 270px;
 
-      opacity: 0.65;
+      border:
+        1px solid transparent;
+
+      border-top-color: rgba(70, 205, 255, 0.75);
+      border-bottom-color: rgba(183, 77, 255, 0.72);
+
+      opacity: 0.78;
 
       animation:
-        rotateClockwise 15s linear infinite;
+        spin 15s linear infinite;
     }
+
+
+    .energy-four {
+      width: 292px;
+      height: 292px;
+
+      border:
+        1px solid rgba(106, 84, 255, 0.17);
+
+      animation:
+        slowSpin 25s linear infinite;
+    }
+
 
     /* =========================================
-       INNER CORE
+       ENERGY SEGMENTS
     ========================================= */
 
-    .core-inner {
-      position: relative;
-      z-index: 5;
-
-      width: 112px;
-      height: 112px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .energy-segment {
+      position: absolute;
 
       border-radius: 50%;
 
-      background:
-        radial-gradient(
-          circle at 35% 30%,
-          #3b2267,
-          #120b24 70%
-        );
-
-      border: 2px solid rgba(196, 125, 255, 0.85);
-
-      box-shadow:
-        0 0 25px rgba(155, 92, 255, 0.7),
-        inset 0 0 25px rgba(155, 92, 255, 0.20);
-
-      animation: coreBreath 3s ease-in-out infinite;
+      pointer-events: none;
     }
 
-    .core-logo {
-      font-size: 43px;
 
-      font-weight: 900;
+    .segment-a {
+      width: 315px;
+      height: 315px;
 
-      letter-spacing: 2px;
+      border:
+        2px solid transparent;
 
-      background:
-        linear-gradient(
-          135deg,
-          #ffffff,
-          #c77dff,
-          #58cfff
-        );
+      border-top-color: rgba(105, 55, 255, 0.55);
 
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      transform: rotate(35deg);
 
-      text-shadow:
-        0 0 20px rgba(183, 113, 255, 0.45);
+      animation:
+        spinReverse 18s linear infinite;
     }
+
+
+    .segment-b {
+      width: 320px;
+      height: 320px;
+
+      border:
+        2px solid transparent;
+
+      border-bottom-color: rgba(45, 196, 255, 0.48);
+
+      transform: rotate(-40deg);
+
+      animation:
+        spin 20s linear infinite;
+    }
+
 
     /* =========================================
-       PARTICLES
+       CORE CENTER
+    ========================================= */
+
+    .core-center {
+      position: relative;
+
+      z-index: 10;
+
+      width: 126px;
+      height: 126px;
+
+      border-radius: 50%;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      background:
+        radial-gradient(
+          circle at 38% 30%,
+          #493078,
+          #160c32 62%,
+          #090719 100%
+        );
+
+      border:
+        2px solid rgba(205, 117, 255, 0.86);
+
+      box-shadow:
+        0 0 22px rgba(174, 81, 255, 0.80),
+        0 0 55px rgba(93, 72, 255, 0.35),
+        inset 0 0 28px rgba(155, 92, 255, 0.25);
+
+      animation:
+        corePulse 3.2s ease-in-out infinite;
+    }
+
+
+    /* =========================================
+       CUSTOM AV MARK
+    ========================================= */
+
+    .core-logo {
+      width: 78px;
+      height: 52px;
+
+      filter:
+        drop-shadow(0 0 6px rgba(208, 115, 255, 0.75))
+        drop-shadow(0 0 14px rgba(75, 154, 255, 0.35));
+    }
+
+
+    /* =========================================
+       CORE PARTICLES
     ========================================= */
 
     .particle {
@@ -386,676 +473,173 @@
 
       border-radius: 50%;
 
-      background: #b878ff;
+      background: #b86cff;
 
       box-shadow:
-        0 0 10px #9b5cff;
+        0 0 9px #9b5cff,
+        0 0 16px rgba(80, 160, 255, 0.55);
 
-      animation: particleFloat 4s ease-in-out infinite;
+      pointer-events: none;
+
+      animation:
+        particleFloat 4s ease-in-out infinite;
     }
 
+
     .p1 {
-      top: 25%;
-      left: 23%;
-      animation-delay: 0s;
+      left: 18%;
+      top: 36%;
     }
 
     .p2 {
-      top: 18%;
-      right: 28%;
-      animation-delay: 1s;
+      right: 19%;
+      top: 29%;
+
+      animation-delay: 0.7s;
     }
 
     .p3 {
-      bottom: 27%;
-      left: 28%;
-      animation-delay: 2s;
+      left: 26%;
+      bottom: 30%;
+
+      animation-delay: 1.4s;
     }
 
     .p4 {
-      bottom: 20%;
-      right: 24%;
-      animation-delay: 0.5s;
+      right: 25%;
+      bottom: 25%;
+
+      animation-delay: 2.1s;
     }
 
     .p5 {
-      top: 48%;
-      left: 15%;
-      animation-delay: 1.5s;
+      left: 12%;
+      top: 53%;
+
+      animation-delay: 0.9s;
     }
 
     .p6 {
-      top: 55%;
-      right: 15%;
-      animation-delay: 2.5s;
+      right: 12%;
+      top: 52%;
+
+      animation-delay: 1.8s;
     }
 
+    .p7 {
+      left: 35%;
+      top: 20%;
+
+      animation-delay: 2.7s;
+    }
+
+    .p8 {
+      right: 34%;
+      bottom: 19%;
+
+      animation-delay: 3.2s;
+    }
+
+
     /* =========================================
-       CORE STATUS
+       STATUS
     ========================================= */
 
     .ai-status {
-      margin-top: 14px;
+      position: relative;
+      z-index: 5;
 
       display: flex;
+
       align-items: center;
       justify-content: center;
 
       gap: 8px;
 
-      color: var(--muted);
+      margin-top: -3px;
 
-      font-size: 11px;
+      color: #d4d6eb;
+
+      font-size: 12px;
 
       letter-spacing: 2px;
+
+      text-align: center;
     }
+
 
     .status-dot {
       width: 7px;
       height: 7px;
+
+      flex-shrink: 0;
 
       border-radius: 50%;
 
       background: var(--green);
 
       box-shadow:
-        0 0 10px rgba(85, 230, 173, 0.9);
+        0 0 7px var(--green),
+        0 0 15px rgba(39, 230, 165, 0.55);
 
-      animation: statusPulse 2s ease-in-out infinite;
+      animation:
+        statusPulse 2s ease-in-out infinite;
     }
 
-    /* =========================================
-       CORE HINT
-    ========================================= */
 
     .core-hint {
-      margin-top: 7px;
-
-      text-align: center;
-
-      color: #777184;
-
-      font-size: 11px;
-
-      letter-spacing: 1px;
-    }
-
-    /* =========================================
-       VOICE BUTTON
-    ========================================= */
-
-    .voice-area {
-      margin-top: 18px;
-
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .voice-circle {
-      width: 70px;
-      height: 70px;
-
-      border: 2px solid rgba(155, 92, 255, 0.75);
-
-      border-radius: 50%;
-
-      background:
-        radial-gradient(
-          circle,
-          #34205e,
-          #10091d
-        );
-
-      color: white;
-
-      font-size: 27px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 0 20px rgba(155, 92, 255, 0.4);
-
-      transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-    }
-
-    .voice-circle:active {
-      transform: scale(0.93);
-
-      box-shadow:
-        0 0 35px rgba(155, 92, 255, 0.8);
-    }
-
-    .tap-text {
       margin-top: 9px;
 
-      color: #c9c2dc;
-
-      font-size: 10px;
-
-      font-weight: bold;
-
-      letter-spacing: 2px;
-    }
-
-    /* =========================================
-       MEMORY CORE
-    ========================================= */
-
-    .memory {
-      margin-top: 20px;
-
-      padding: 17px;
-
-      border: 1px solid var(--border);
-
-      border-radius: 20px;
-
-      background:
-        rgba(15, 11, 28, 0.75);
-
-      backdrop-filter: blur(10px);
-    }
-
-    .section-title {
-      font-size: 14px;
-
-      letter-spacing: 1px;
-    }
-
-    .memory-label {
-      margin-top: 7px;
-
-      color: var(--purple-bright);
+      color: #737791;
 
       font-size: 11px;
-    }
 
-    .memory-text {
-      margin-top: 5px;
-
-      color: var(--muted);
-
-      font-size: 12px;
-
-      line-height: 1.5;
-    }
-
-    .progress {
-      width: 100%;
-      height: 6px;
-
-      margin-top: 13px;
-
-      overflow: hidden;
-
-      border-radius: 10px;
-
-      background: #211a30;
-    }
-
-    .progress-fill {
-      width: 82%;
-      height: 100%;
-
-      border-radius: 10px;
-
-      background:
-        linear-gradient(
-          90deg,
-          #7540ff,
-          #bd6cff
-        );
-    }
-
-    .memory-percent {
-      margin-top: 6px;
-
-      text-align: right;
-
-      color: var(--muted);
-
-      font-size: 10px;
-    }
-
-    /* =========================================
-       COMMAND BAR
-    ========================================= */
-
-    .command {
-      display: flex;
-      align-items: center;
-
-      gap: 8px;
-
-      margin-top: 18px;
-
-      padding: 8px;
-
-      border: 1px solid rgba(155, 92, 255, 0.38);
-
-      border-radius: 24px;
-
-      background:
-        rgba(12, 9, 23, 0.95);
-
-      box-shadow:
-        0 0 20px rgba(111, 56, 255, 0.07);
-    }
-
-    .command input {
-      flex: 1;
-
-      min-width: 0;
-
-      padding: 11px;
-
-      border: none;
-      outline: none;
-
-      background: transparent;
-
-      color: white;
-
-      font-size: 13px;
-    }
-
-    .command input::placeholder {
-      color: #777184;
-    }
-
-    .send {
-      width: 44px;
-      height: 44px;
-
-      flex-shrink: 0;
-
-      border: none;
-
-      border-radius: 50%;
-
-      background:
-        linear-gradient(
-          135deg,
-          #7040ff,
-          #8e50ff
-        );
-
-      color: white;
-
-      font-size: 19px;
-
-      cursor: pointer;
-
-      box-shadow:
-        0 0 15px rgba(111, 56, 255, 0.45);
-    }
-
-    .send:active {
-      transform: scale(0.94);
-    }
-
-    /* =========================================
-       NAVIGATION
-    ========================================= */
-
-    .nav {
-      display: flex;
-
-      justify-content: space-around;
-      align-items: center;
-
-      gap: 4px;
-
-      margin-top: 18px;
-
-      padding: 13px 7px;
-
-      border: 1px solid var(--border);
-
-      border-radius: 20px;
-
-      background:
-        rgba(10, 8, 18, 0.94);
-    }
-
-    .nav span {
-      color: #aaa4bc;
-
-      font-size: 10px;
+      letter-spacing: 1px;
 
       text-align: center;
-
-      white-space: nowrap;
     }
+
 
     /* =========================================
-       ANIMATIONS
+       BOTTOM CONTROL DOCK
     ========================================= */
 
-    @keyframes rotateClockwise {
-      from {
-        transform: rotate(0deg);
-      }
+    .control-dock {
+      position: relative;
+      z-index: 10;
 
-      to {
-        transform: rotate(360deg);
-      }
-    }
+      width: 100%;
 
-    @keyframes rotateCounter {
-      from {
-        transform: rotate(360deg);
-      }
+      max-width: 320px;
 
-      to {
-        transform: rotate(0deg);
-      }
-    }
+      height: 78px;
 
-    @keyframes coreBreath {
-      0%,
-      100% {
-        transform: scale(0.96);
-      }
+      margin:
+        26px auto
+        0;
 
-      50% {
-        transform: scale(1.04);
-      }
-    }
+      padding: 9px;
 
-    @keyframes coreGlow {
-      0%,
-      100% {
-        opacity: 0.65;
-        transform: scale(0.92);
-      }
+      display: grid;
 
-      50% {
-        opacity: 1;
-        transform: scale(1.08);
-      }
-    }
+      grid-template-columns: 1fr 1.35fr 1fr;
 
-    @keyframes particleFloat {
-      0%,
-      100% {
-        transform: translateY(0) scale(0.8);
-        opacity: 0.4;
-      }
+      align-items: center;
 
-      50% {
-        transform: translateY(-14px) scale(1.2);
-        opacity: 1;
-      }
-    }
+      border:
+        1px solid rgba(93, 105, 255, 0.28);
 
-    @keyframes statusPulse {
-      0%,
-      100% {
-        opacity: 0.5;
-        transform: scale(0.85);
-      }
+      border-radius: 40px;
 
-      50% {
-        opacity: 1;
-        transform: scale(1.15);
-      }
-    }
+      background:
+        linear-gradient(
+          180deg,
+          rgba(19, 25, 58, 0.82),
+          rgba(7, 11, 28, 0.92)
+        );
 
-    /* =========================================
-       TABLET / DESKTOP
-    ========================================= */
+      box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.35),
+        inset 0 0 20px rgba(84, 91, 255, 0.07);
 
-    @media (min-width: 700px) {
-
-      .dashboard {
-        max-width: 760px;
-
-        padding: 28px;
-      }
-
-      .core-section {
-        height: 520px;
-      }
-
-      .av-core {
-        transform: scale(1.15);
-      }
-
-      .logo {
-        font-size: 48px;
-      }
-    }
-
-  </style>
-</head>
-
-
-<body>
-
-  <main class="dashboard">
-
-    <!-- =====================================
-         TOP
-    ====================================== -->
-
-    <section class="top">
-
-      <div class="brand">
-
-        <div class="logo">
-          AV
-        </div>
-
-        <div class="tagline">
-          YOUR VOICE. MY COMMAND.
-        </div>
-
-      </div>
-
-      <div class="online">
-        ● AV ONLINE
-      </div>
-
-    </section>
-
-
-    <!-- =====================================
-         GREETING
-    ====================================== -->
-
-    <section class="greeting">
-
-      <h2>
-        Good Evening, Boss 💜
-      </h2>
-
-      <p>
-        I'm AV. I'm here.
-      </p>
-
-    </section>
-
-
-    <!-- =====================================
-         AV CORE
-    ====================================== -->
-
-    <section class="core-section">
-
-      <div
-        class="av-core"
-        aria-label="AV Core"
-      >
-
-        <div class="core-glow"></div>
-
-        <div class="core-ring ring-one"></div>
-
-        <div class="core-ring ring-two"></div>
-
-        <div class="core-ring ring-three"></div>
-
-        <div class="core-inner">
-
-          <div class="core-logo">
-            AV
-          </div>
-
-        </div>
-
-        <!-- Floating particles -->
-
-        <span class="particle p1"></span>
-        <span class="particle p2"></span>
-        <span class="particle p3"></span>
-        <span class="particle p4"></span>
-        <span class="particle p5"></span>
-        <span class="particle p6"></span>
-
-      </div>
-
-    </section>
-
-
-    <!-- =====================================
-         STATUS
-    ====================================== -->
-
-    <div class="ai-status">
-
-      <span class="status-dot"></span>
-
-      <p>
-        STANDBY
-      </p>
-
-    </div>
-
-    <div class="core-hint">
-      Ready when you are...
-    </div>
-
-
-    <!-- =====================================
-         VOICE
-    ====================================== -->
-
-    <section class="voice-area">
-
-      <button
-        class="voice-circle mic"
-        type="button"
-        aria-label="Tap to speak"
-      >
-        🎙️
-      </button>
-
-      <div class="tap-text">
-        TAP TO SPEAK
-      </div>
-
-    </section>
-
-
-    <!-- =====================================
-         MEMORY CORE
-    ====================================== -->
-
-    <section class="memory">
-
-      <h3 class="section-title">
-        MEMORY CORE
-      </h3>
-
-      <div class="memory-label">
-        ACTIVE
-      </div>
-
-      <p class="memory-text">
-        All your memories are safe with me.
-      </p>
-
-      <div class="progress">
-
-        <div class="progress-fill"></div>
-
-      </div>
-
-      <div class="memory-percent">
-        82%
-      </div>
-
-    </section>
-
-
-    <!-- =====================================
-         COMMAND
-    ====================================== -->
-
-    <section class="command">
-
-      <input
-        type="text"
-        placeholder="Type your command..."
-        aria-label="Command"
-      >
-
-      <button
-        class="send"
-        type="button"
-        aria-label="Send message"
-      >
-        ➤
-      </button>
-
-    </section>
-
-
-    <!-- =====================================
-         NAVIGATION
-    ====================================== -->
-
-    <nav class="nav">
-
-      <span>🏠 Home</span>
-
-      <span>💬 Chat</span>
-
-      <span>🕘 History</span>
-
-      <span>⚙️ Settings</span>
-
-      <span>👤 Profile</span>
-
-    </nav>
-
-  </main>
-
-
-  <!-- =====================================
-       AV AGENTS
-  ====================================== -->
-
-  <script src="memory-agent.js"></script>
-
-  <script src="chat-agent.js?v=3"></script>
-
-  <script src="language-agent.js"></script>
-
-  <script src="agents/story-agent.js"></script>
-
-  <script src="master-core.js"></script>
-
-  <script src="app.js"></script>
-
-</body>
-
-  </html>
+      backdrop-filter:
