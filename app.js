@@ -1,29 +1,64 @@
 /* =========================================
    AV — APP CONTROLLER
-   Speech-to-Speech Edition v2.0
-   ElevenLabs TTS + Master Core + Memory
+   Browser Speech Edition v3.0
+
+   Speech Recognition
+   Browser Speech Synthesis
+   Master Core
+   Memory
+   AV UI States
+
+   STATES:
+   STANDBY
+   LISTENING
+   THINKING
+   SPEAKING
+   REVEAL
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
   "use strict";
 
-  const input = document.querySelector(".command input");
-  const sendButton = document.querySelector(".send");
-  const micButton = document.querySelector(".mic");
-  const messageBox = document.querySelector(".greeting p");
+  /* =========================================
+     ELEMENTS
+  ========================================= */
 
-  if (!micButton) {
-    console.error("AV SPEECH → Mic button not found.");
+  const micButton =
+    document.querySelector(".mic");
+
+  const input =
+    document.querySelector(".command input");
+
+  const sendButton =
+    document.querySelector(".send");
+
+  /* =========================================
+     MASTER CORE CHECK
+  ========================================= */
+
+  if (!window.VYRA_MASTER) {
+
+    console.error(
+      "AV → Master Core not found."
+    );
+
+    if (window.AV_UI) {
+      window.AV_UI.setState("standby");
+    }
+
     return;
   }
 
-  if (!window.VYRA_MASTER) {
-    console.error("AV → Master Core not found.");
+  /* =========================================
+     MICROPHONE CHECK
+  ========================================= */
 
-    if (messageBox) {
-      messageBox.textContent = "AV system connection error.";
-    }
+  if (!micButton) {
+
+    console.error(
+      "AV SPEECH → Mic button not found."
+    );
 
     return;
   }
@@ -31,278 +66,669 @@ document.addEventListener("DOMContentLoaded", function () {
   console.log("=================================");
   console.log("AV SPEECH SYSTEM: INITIALIZING");
   console.log("Master Core: CONNECTED");
-  console.log("ElevenLabs TTS: READY");
+  console.log("Browser Speech: READY");
   console.log("=================================");
+
+
+  /* =========================================
+     SPEECH RECOGNITION
+  ========================================= */
 
   const SpeechRecognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
+
   if (!SpeechRecognition) {
-    console.error("AV SPEECH → Speech Recognition not supported.");
-    micButton.title = "Speech recognition is not supported";
+
+    console.error(
+      "AV SPEECH → Speech Recognition not supported."
+    );
+
+    micButton.title =
+      "Speech recognition is not supported";
+
     return;
   }
 
-  const recognition = new SpeechRecognition();
+
+  const recognition =
+    new SpeechRecognition();
+
 
   recognition.continuous = false;
+
   recognition.interimResults = false;
+
   recognition.lang = "en-IN";
 
-  let isListening = false;
-  let isSpeaking = false;
-  let currentAudio = null;
-  let currentAudioUrl = null;
 
   /* =========================================
-     CLEAN TEXT FOR SPEECH
+     STATE VARIABLES
+  ========================================= */
+
+  let isListening = false;
+
+  let isSpeaking = false;
+
+  let recognitionActive = false;
+
+  let currentUtterance = null;
+
+
+  /* =========================================
+     UI STATE
+  ========================================= */
+
+  function setState(state) {
+
+    const normalized =
+      String(state || "standby")
+        .toLowerCase();
+
+
+    if (window.AV_UI &&
+        typeof window.AV_UI.setState === "function") {
+
+      window.AV_UI.setState(
+        normalized
+      );
+
+    } else {
+
+      console.log(
+        "AV UI STATE →",
+        normalized
+      );
+    }
+
+  }
+
+
+  /* =========================================
+     SPEECH TEXT CLEANER
   ========================================= */
 
   function cleanSpeechText(text) {
+
     return String(text || "")
-      .replace(/```[\s\S]*?```/g, "")
-      .replace(/<br\s*\/?>/gi, " ")
-      .replace(/<[^>]*>/g, "")
-      .replace(/\*\*/g, "")
-      .replace(/\*/g, "")
-      .replace(/#{1,6}\s/g, "")
-      .replace(/^\s*[-•]\s*/gm, "")
-      .replace(/\s+/g, " ")
+
+      .replace(
+        /```[\s\S]*?```/g,
+        ""
+      )
+
+      .replace(
+        /<br\s*\/?>/gi,
+        " "
+      )
+
+      .replace(
+        /<[^>]*>/g,
+        ""
+      )
+
+      .replace(
+        /\*\*/g,
+        ""
+      )
+
+      .replace(
+        /\*/g,
+        ""
+      )
+
+      .replace(
+        /#{1,6}\s/g,
+        ""
+      )
+
+      .replace(
+        /^\s*[-•]\s*/gm,
+        ""
+      )
+
+      .replace(
+        /\s+/g,
+        " "
+      )
+
       .trim();
   }
 
-  /* =========================================
-     STOP CURRENT AUDIO
-  ========================================= */
-
-  function stopCurrentAudio() {
-    if (currentAudio) {
-      try {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      } catch (error) {
-        console.warn("AV AUDIO STOP:", error);
-      }
-
-      currentAudio = null;
-    }
-
-    if (currentAudioUrl) {
-      URL.revokeObjectURL(currentAudioUrl);
-      currentAudioUrl = null;
-    }
-
-    isSpeaking = false;
-  }
 
   /* =========================================
-     ELEVENLABS TTS
+     STOP BROWSER SPEECH
   ========================================= */
 
-  async function speak(text) {
-
-    const cleanText = cleanSpeechText(text);
-
-    if (!cleanText) {
-      console.warn("AV TTS → Empty text.");
-      return;
-    }
-
-    stopCurrentAudio();
+  function stopSpeaking() {
 
     try {
 
-      console.log("🔊 AV TTS → Requesting voice...");
-      console.log("AV TTS → Text:", cleanText);
-
-      setStatus("VYLEN SPEAKING");
-
-      const response = await fetch("/api/tts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          text: cleanText
-        })
-      });
-
-      console.log(
-        "🔊 AV TTS → Response:",
-        response.status
-      );
-
-      if (!response.ok) {
-
-        let errorMessage = "Voice generation failed.";
-
-        try {
-          const data = await response.json();
-
-          if (data?.error) {
-            errorMessage = data.error;
-          }
-
-        } catch (error) {
-          console.warn("AV TTS → Error response was not JSON.");
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      const audioBlob = await response.blob();
-
-      if (!audioBlob.size) {
-        throw new Error("Empty audio received.");
-      }
-
-      currentAudioUrl = URL.createObjectURL(audioBlob);
-
-      currentAudio = new Audio(currentAudioUrl);
-
-      currentAudio.preload = "auto";
-      currentAudio.volume = 1.0;
-
-      currentAudio.onplay = function () {
-        isSpeaking = true;
-
-        console.log("🔊 AV TTS → SPEAKING");
-        setStatus("VYLEN SPEAKING");
-      };
-
-      currentAudio.onended = function () {
-
-        console.log("🔊 AV TTS → FINISHED");
-
-        isSpeaking = false;
-
-        if (currentAudioUrl) {
-          URL.revokeObjectURL(currentAudioUrl);
-          currentAudioUrl = null;
-        }
-
-        currentAudio = null;
-
-        if (!isListening) {
-          setStatus("STANDBY");
-        }
-      };
-
-      currentAudio.onerror = function (error) {
-
-        console.error(
-          "AV AUDIO PLAYBACK ERROR:",
-          error
-        );
-
-        isSpeaking = false;
-        currentAudio = null;
-
-        if (currentAudioUrl) {
-          URL.revokeObjectURL(currentAudioUrl);
-          currentAudioUrl = null;
-        }
-
-        setStatus("STANDBY");
-      };
-
-      const playPromise = currentAudio.play();
-
-      if (playPromise !== undefined) {
-
-        await playPromise;
-
-        console.log("🔊 AV TTS → Playback started.");
-
-      }
+      window.speechSynthesis.cancel();
 
     } catch (error) {
 
-      console.error("AV TTS ERROR:", error);
+      console.warn(
+        "AV SPEECH STOP:",
+        error
+      );
 
-      isSpeaking = false;
-
-      setStatus("STANDBY");
-
-      if (messageBox) {
-        messageBox.textContent =
-          "AV voice service में थोड़ी problem आ गई।";
-      }
     }
+
+    currentUtterance = null;
+
+    isSpeaking = false;
+
   }
 
+
   /* =========================================
-     STATUS
+     FIND BEST BROWSER VOICE
   ========================================= */
 
-  function setStatus(status) {
+  function getPreferredVoice() {
 
-    const statusElements =
-      document.querySelectorAll(".card p");
+    const voices =
+      window.speechSynthesis
+        .getVoices();
 
-    statusElements.forEach(function (element) {
 
-      const text =
-        element.textContent.trim().toUpperCase();
+    if (!voices.length) {
+      return null;
+    }
+
+
+    /*
+      Prefer Indian English voices.
+    */
+
+    const preferredNames = [
+
+      "Microsoft Heera",
+      "Microsoft Neerja",
+      "Microsoft Aditi",
+      "Google हिन्दी",
+      "Google Hindi",
+      "Google UK English Female",
+      "Google US English Female"
+
+    ];
+
+
+    for (
+      const preferredName
+      of preferredNames
+    ) {
+
+      const voice =
+        voices.find(function (item) {
+
+          return item.name
+            .toLowerCase()
+            .includes(
+              preferredName.toLowerCase()
+            );
+
+        });
+
+
+      if (voice) {
+        return voice;
+      }
+
+    }
+
+
+    /*
+      Next preference:
+      Indian English / Hindi.
+    */
+
+    const indianVoice =
+      voices.find(function (voice) {
+
+        const language =
+          String(
+            voice.lang || ""
+          ).toLowerCase();
+
+        return (
+          language === "en-in" ||
+          language === "hi-in"
+        );
+
+      });
+
+
+    if (indianVoice) {
+      return indianVoice;
+    }
+
+
+    /*
+      Final fallback:
+      English voice.
+    */
+
+    const englishVoice =
+      voices.find(function (voice) {
+
+        return String(
+          voice.lang || ""
+        )
+        .toLowerCase()
+        .startsWith("en");
+
+      });
+
+
+    return englishVoice || voices[0];
+
+  }
+
+
+  /* =========================================
+     BROWSER TTS
+  ========================================= */
+
+  function speak(text) {
+
+    return new Promise(function (resolve) {
+
+      const cleanText =
+        cleanSpeechText(text);
+
+
+      if (!cleanText) {
+
+        console.warn(
+          "AV SPEECH → Empty response."
+        );
+
+        setState("standby");
+
+        resolve();
+
+        return;
+      }
+
+
+      stopSpeaking();
+
 
       if (
-        text === "STANDBY" ||
-        text === "LISTENING" ||
-        text === "THINKING" ||
-        text === "VYRA SPEAKING" ||
-        text === "VYLEN SPEAKING" ||
-        text === "AV SPEAKING"
+        !window.speechSynthesis
       ) {
-        element.textContent = status;
+
+        console.error(
+          "AV SPEECH → Browser speech synthesis unavailable."
+        );
+
+        setState("standby");
+
+        resolve();
+
+        return;
       }
+
+
+      console.log(
+        "🔊 AV SPEECH → Speaking:",
+        cleanText
+      );
+
+
+      setState("speaking");
+
+
+      const utterance =
+        new SpeechSynthesisUtterance(
+          cleanText
+        );
+
+
+      currentUtterance =
+        utterance;
+
+
+      const voice =
+        getPreferredVoice();
+
+
+      if (voice) {
+
+        utterance.voice =
+          voice;
+
+        console.log(
+          "🔊 AV VOICE →",
+          voice.name,
+          voice.lang
+        );
+
+      }
+
+
+      /*
+        Indian English friendly settings.
+        Browser/voice may interpret these differently.
+      */
+
+      utterance.lang =
+        voice?.lang || "en-IN";
+
+
+      utterance.rate =
+        0.95;
+
+
+      utterance.pitch =
+        1.05;
+
+
+      utterance.volume =
+        1.0;
+
+
+      utterance.onstart =
+        function () {
+
+          isSpeaking = true;
+
+          console.log(
+            "🔊 AV SPEECH → SPEAKING"
+          );
+
+          setState("speaking");
+
+        };
+
+
+      utterance.onend =
+        function () {
+
+          console.log(
+            "🔊 AV SPEECH → FINISHED"
+          );
+
+          isSpeaking = false;
+
+          currentUtterance =
+            null;
+
+
+          if (!isListening) {
+
+            setState("standby");
+
+          }
+
+
+          resolve();
+
+        };
+
+
+      utterance.onerror =
+        function (event) {
+
+          console.error(
+            "AV SPEECH SYNTHESIS ERROR:",
+            event.error
+          );
+
+          isSpeaking = false;
+
+          currentUtterance =
+            null;
+
+          setState("standby");
+
+          resolve();
+
+        };
+
+
+      /*
+        Some Android browsers need a
+        small delay before speaking.
+      */
+
+      setTimeout(function () {
+
+        try {
+
+          window.speechSynthesis
+            .speak(
+              utterance
+            );
+
+        } catch (error) {
+
+          console.error(
+            "AV SPEECH START ERROR:",
+            error
+          );
+
+          isSpeaking = false;
+
+          currentUtterance =
+            null;
+
+          setState("standby");
+
+          resolve();
+
+        }
+
+      }, 80);
 
     });
 
-    console.log("AV STATUS →", status);
   }
+
 
   /* =========================================
-     HIDE CONVERSATION TEXT
+     LOAD BROWSER VOICES
   ========================================= */
 
-  function hideConversationText() {
+  if (
+    "onvoiceschanged"
+    in window.speechSynthesis
+  ) {
 
-    if (!messageBox) return;
+    window.speechSynthesis
+      .onvoiceschanged =
+      function () {
 
-    messageBox.innerHTML =
-      "Voice mode active. 🎙️";
+        const voices =
+          window.speechSynthesis
+            .getVoices();
+
+        console.log(
+          "🔊 AV VOICES LOADED:",
+          voices.length
+        );
+
+      };
+
   }
+
+
+  /*
+    Initial voice loading attempt.
+  */
+
+  window.speechSynthesis
+    .getVoices();
+
+
+  /* =========================================
+     REVEAL COMMAND DETECTION
+  ========================================= */
+
+  function isRevealCommand(message) {
+
+    const text =
+      String(message || "")
+        .toLowerCase()
+        .trim();
+
+
+    const revealKeywords = [
+
+      "अपने दर्शन",
+      "दर्शन कराओ",
+      "दर्शन तो कराओ",
+      "अपना चेहरा",
+      "चेहरा तो दिखाओ",
+      "चेहरा दिखाओ",
+      "खुद को दिखाओ",
+      "तुम्हें देखना चाहते",
+      "तुम्हारा चेहरा",
+      "show yourself",
+      "show your face",
+      "show yourself av",
+      "reveal yourself",
+      "reveal av"
+
+    ];
+
+
+    return revealKeywords.some(
+      function (keyword) {
+
+        return text.includes(
+          keyword
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================
+     REVEAL STATE
+  ========================================= */
+
+  function triggerReveal() {
+
+    console.log(
+      "✨ AV → REVEAL TRIGGERED"
+    );
+
+
+    setState("reveal");
+
+
+    /*
+      Keep reveal state visible
+      briefly before normal flow.
+    */
+
+    setTimeout(function () {
+
+      /*
+        Future avatar system will be
+        connected here.
+
+        For now the Core simply returns
+        to standby.
+      */
+
+      if (!isSpeaking &&
+          !isListening) {
+
+        setState("standby");
+
+      }
+
+    }, 3500);
+
+  }
+
 
   /* =========================================
      PROCESS MESSAGE
   ========================================= */
 
-  async function processVoiceMessage(message) {
+  async function processVoiceMessage(
+    message
+  ) {
 
-    if (!message) return;
+    const original =
+      String(message || "")
+        .trim();
 
-    console.log("AV SPEECH → USER:", message);
 
-    setStatus("THINKING");
+    if (!original) {
+      return;
+    }
+
+
+    console.log(
+      "🎤 AV USER →",
+      original
+    );
+
+
+    /*
+      Reveal command is detected
+      before normal processing.
+    */
+
+    if (
+      isRevealCommand(
+        original
+      )
+    ) {
+
+      triggerReveal();
+
+    }
+
+
+    /*
+      AI processing starts.
+    */
+
+    setState("thinking");
+
 
     try {
 
       const result =
-        await window.VYRA_MASTER.process(message);
+        await window.VYRA_MASTER
+          .process(
+            original
+          );
+
 
       console.log(
-        "AV SPEECH → AI RESULT:",
+        "🧠 AV AI RESULT →",
         result
       );
 
+
       let reply = "";
 
+
       if (result?.reply) {
-        reply = result.reply;
-      } else if (result?.message) {
-        reply = result.message;
+
+        reply =
+          result.reply;
+
+      } else if (
+        result?.message
+      ) {
+
+        reply =
+          result.message;
+
       }
+
 
       if (!reply) {
 
@@ -310,15 +736,27 @@ document.addEventListener("DOMContentLoaded", function () {
           "AV SPEECH → Empty AI response."
         );
 
-        setStatus("STANDBY");
+        setState("standby");
+
         return;
+
       }
 
-      hideConversationText();
 
-      console.log("AV SPEECH → AV:", reply);
+      console.log(
+        "💜 AV →",
+        reply
+      );
 
-      await speak(reply);
+
+      /*
+        Browser speaks the response.
+      */
+
+      await speak(
+        reply
+      );
+
 
     } catch (error) {
 
@@ -327,14 +765,13 @@ document.addEventListener("DOMContentLoaded", function () {
         error
       );
 
-      setStatus("STANDBY");
 
-      if (messageBox) {
-        messageBox.textContent =
-          "AV connection में थोड़ी problem आ गई।";
-      }
+      setState("standby");
+
     }
+
   }
+
 
   /* =========================================
      START LISTENING
@@ -342,24 +779,52 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function startListening() {
 
-    if (isListening) {
+    /*
+      If AV is speaking,
+      stop it first.
+    */
+
+    if (isSpeaking) {
+
+      console.log(
+        "AV SPEECH → Stopping current speech."
+      );
+
+      stopSpeaking();
+
+    }
+
+
+    /*
+      Prevent duplicate recognition.start()
+    */
+
+    if (
+      isListening ||
+      recognitionActive
+    ) {
 
       console.log(
         "AV SPEECH → Already listening."
       );
 
       return;
+
     }
 
-    if (isSpeaking) {
-      stopCurrentAudio();
-    }
 
     try {
 
-      recognition.lang = "en-IN";
+      recognition.lang =
+        "en-IN";
+
 
       recognition.start();
+
+
+      recognitionActive =
+        true;
+
 
     } catch (error) {
 
@@ -367,86 +832,201 @@ document.addEventListener("DOMContentLoaded", function () {
         "AV SPEECH START:",
         error
       );
+
+      recognitionActive =
+        false;
+
     }
+
   }
 
+
   /* =========================================
-     SPEECH RECOGNITION EVENTS
+     SPEECH RECOGNITION — START
   ========================================= */
 
-  recognition.onstart = function () {
+  recognition.onstart =
+    function () {
 
-    isListening = true;
+      isListening =
+        true;
 
-    console.log(
-      "🎤 AV SPEECH → LISTENING"
-    );
+      recognitionActive =
+        true;
 
-    setStatus("LISTENING");
-  };
-
-  recognition.onresult = function (event) {
-
-    const transcript =
-      event.results[
-        event.results.length - 1
-      ][0].transcript.trim();
-
-    console.log(
-      "🎤 AV SPEECH → HEARD:",
-      transcript
-    );
-
-    if (!transcript) {
-
-      setStatus("STANDBY");
-
-      return;
-    }
-
-    hideConversationText();
-
-    processVoiceMessage(transcript);
-  };
-
-  recognition.onend = function () {
-
-    isListening = false;
-
-    console.log(
-      "AV SPEECH → LISTENING ENDED"
-    );
-
-    if (!isSpeaking) {
-      setStatus("STANDBY");
-    }
-  };
-
-  recognition.onerror = function (event) {
-
-    isListening = false;
-
-    console.error(
-      "AV SPEECH RECOGNITION ERROR:",
-      event.error
-    );
-
-    setStatus("STANDBY");
-
-    if (event.error === "not-allowed") {
-
-      console.warn(
-        "AV SPEECH → Microphone permission denied."
-      );
-    }
-
-    if (event.error === "no-speech") {
 
       console.log(
-        "AV SPEECH → No speech detected."
+        "🎤 AV → LISTENING"
       );
-    }
-  };
+
+
+      setState(
+        "listening"
+      );
+
+    };
+
+
+  /* =========================================
+     SPEECH RECOGNITION — RESULT
+  ========================================= */
+
+  recognition.onresult =
+    function (event) {
+
+      const lastResult =
+        event.results[
+          event.results.length - 1
+        ];
+
+
+      const transcript =
+        lastResult[0]
+          .transcript
+          .trim();
+
+
+      console.log(
+        "🎤 AV HEARD →",
+        transcript
+      );
+
+
+      if (!transcript) {
+
+        setState(
+          "standby"
+        );
+
+        return;
+
+      }
+
+
+      /*
+        Recognition has heard the user.
+        Move immediately to THINKING.
+      */
+
+      setState(
+        "thinking"
+      );
+
+
+      processVoiceMessage(
+        transcript
+      );
+
+    };
+
+
+  /* =========================================
+     SPEECH RECOGNITION — END
+  ========================================= */
+
+  recognition.onend =
+    function () {
+
+      isListening =
+        false;
+
+      recognitionActive =
+        false;
+
+
+      console.log(
+        "🎤 AV → LISTENING ENDED"
+      );
+
+
+      /*
+        Don't overwrite SPEAKING state.
+      */
+
+      if (!isSpeaking) {
+
+        /*
+          processVoiceMessage() may already
+          have moved the system to THINKING.
+          Therefore we don't force standby
+          here if an AI request is running.
+        */
+
+        console.log(
+          "AV → Recognition ended."
+        );
+
+      }
+
+    };
+
+
+  /* =========================================
+     SPEECH RECOGNITION — ERROR
+  ========================================= */
+
+  recognition.onerror =
+    function (event) {
+
+      isListening =
+        false;
+
+      recognitionActive =
+        false;
+
+
+      console.error(
+        "AV SPEECH RECOGNITION ERROR:",
+        event.error
+      );
+
+
+      if (
+        event.error ===
+        "not-allowed"
+      ) {
+
+        console.warn(
+          "AV → Microphone permission denied."
+        );
+
+      }
+
+
+      if (
+        event.error ===
+        "no-speech"
+      ) {
+
+        console.log(
+          "AV → No speech detected."
+        );
+
+      }
+
+
+      if (
+        event.error ===
+        "aborted"
+      ) {
+
+        console.log(
+          "AV → Recognition aborted."
+        );
+
+      }
+
+
+      if (!isSpeaking) {
+
+        setState(
+          "standby"
+        );
+
+      }
+
+    };
+
 
   /* =========================================
      MICROPHONE BUTTON
@@ -460,15 +1040,21 @@ document.addEventListener("DOMContentLoaded", function () {
         "🎤 AV MIC → CLICK"
       );
 
+
       startListening();
+
     }
   );
 
+
   /* =========================================
-     TEXT SEND BUTTON
+     OPTIONAL TEXT INPUT
   ========================================= */
 
-  if (sendButton && input) {
+  if (
+    sendButton &&
+    input
+  ) {
 
     sendButton.addEventListener(
       "click",
@@ -477,53 +1063,89 @@ document.addEventListener("DOMContentLoaded", function () {
         const message =
           input.value.trim();
 
-        if (!message) return;
 
-        input.value = "";
+        if (!message) {
+          return;
+        }
 
-        await processVoiceMessage(message);
+
+        input.value =
+          "";
+
+
+        await processVoiceMessage(
+          message
+        );
+
       }
     );
+
 
     input.addEventListener(
       "keydown",
       function (event) {
 
-        if (event.key === "Enter") {
+        if (
+          event.key ===
+          "Enter"
+        ) {
 
           event.preventDefault();
+
 
           const message =
             input.value.trim();
 
-          if (!message) return;
 
-          input.value = "";
+          if (!message) {
+            return;
+          }
 
-          processVoiceMessage(message);
+
+          input.value =
+            "";
+
+
+          processVoiceMessage(
+            message
+          );
+
         }
+
       }
     );
+
   }
+
 
   /* =========================================
      INITIAL STATE
   ========================================= */
 
-  hideConversationText();
+  setState(
+    "standby"
+  );
 
-  setStatus("STANDBY");
+
+  console.log(
+    "================================="
+  );
 
   console.log(
     "AV SPEECH SYSTEM: ONLINE"
   );
 
   console.log(
-    "AV ELEVENLABS TTS: CONNECTED"
+    "AV BROWSER TTS: CONNECTED"
+  );
+
+  console.log(
+    "AV UI STATES: READY"
   );
 
   console.log(
     "================================="
+
   );
 
 });
