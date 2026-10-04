@@ -1,24 +1,22 @@
 /* =========================================
    AV — APP CONTROLLER
-   Browser Speech Edition v4.0
+   Simple Voice Conversation v1.0
 
-   Speech Recognition
-   Browser Speech Synthesis
-   Master Core
-   Memory
-   AV UI STATES
-
-   STATES:
-   STANDBY
-   LISTENING
-   THINKING
-   SPEAKING
-   REVEAL
+   MIC
+   SPEECH RECOGNITION
+   MASTER CORE
+   CHAT AGENT
+   BROWSER SPEECH SYNTHESIS
 ========================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
   "use strict";
+
+  console.log("=================================");
+  console.log("AV VOICE SYSTEM: STARTING");
+  console.log("=================================");
+
 
   /* =========================================
      ELEMENTS
@@ -33,22 +31,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const sendButton =
     document.querySelector(".send");
 
-  const core =
-    document.querySelector(".av-core");
-
-  const coreSection =
-    document.querySelector(".core-section");
-
-  const statusText =
-    document.querySelector(".ai-status p");
-
-  const statusDot =
-    document.querySelector(".status-dot");
+  const messageBox =
+    document.querySelector(".greeting p");
 
 
   /* =========================================
-     MASTER CORE CHECK
+     BASIC CHECKS
   ========================================= */
+
+  if (!micButton) {
+
+    console.error(
+      "AV → Microphone button not found."
+    );
+
+    return;
+  }
+
 
   if (!window.VYRA_MASTER) {
 
@@ -56,537 +55,18 @@ document.addEventListener("DOMContentLoaded", function () {
       "AV → Master Core not found."
     );
 
-    setTimeout(function () {
-
-      applyState("standby");
-
-    }, 0);
-
-    return;
-  }
-
-
-  /* =========================================
-     MICROPHONE CHECK
-  ========================================= */
-
-  if (!micButton) {
-
-    console.error(
-      "AV SPEECH → Mic button not found."
-    );
-
-    return;
-  }
-
-
-  console.log("=================================");
-  console.log("AV SPEECH SYSTEM: INITIALIZING");
-  console.log("Master Core: CONNECTED");
-  console.log("Browser Speech: READY");
-  console.log("AV UI STATES: READY");
-  console.log("=================================");
-
-
-  /* =========================================
-     STATE STYLE SYSTEM
-  ========================================= */
-
-  function installStateStyles() {
-
-    if (document.getElementById("av-state-styles")) {
-      return;
+    if (messageBox) {
+      messageBox.textContent =
+        "AV system connection error.";
     }
 
-    const style =
-      document.createElement("style");
-
-    style.id =
-      "av-state-styles";
-
-    style.textContent = `
-
-      /* =====================================
-         AV STATE BASE
-      ===================================== */
-
-      body[data-av-state] .av-core {
-        transition:
-          transform 0.55s ease,
-          filter 0.55s ease;
-      }
-
-      body[data-av-state] .core-section {
-        transition:
-          background 0.7s ease,
-          box-shadow 0.7s ease;
-      }
-
-      body[data-av-state] .core-inner {
-        transition:
-          background 0.7s ease,
-          border-color 0.7s ease,
-          box-shadow 0.7s ease,
-          transform 0.5s ease;
-      }
-
-      body[data-av-state] .core-ring {
-        transition:
-          border-color 0.7s ease,
-          box-shadow 0.7s ease,
-          opacity 0.7s ease;
-      }
-
-      body[data-av-state] .status-dot {
-        transition:
-          background 0.5s ease,
-          box-shadow 0.5s ease,
-          transform 0.3s ease;
-      }
-
-
-      /* =====================================
-         STANDBY
-      ===================================== */
-
-      body[data-av-state="standby"] .core-section {
-
-        background:
-          radial-gradient(
-            circle at center,
-            rgba(52, 24, 100, 0.70),
-            rgba(8, 6, 18, 0.96) 58%,
-            #03040b 100%
-          );
-
-        box-shadow:
-          inset 0 0 55px rgba(111, 56, 255, 0.10),
-          0 0 35px rgba(111, 56, 255, 0.12);
-
-      }
-
-      body[data-av-state="standby"] .av-core {
-
-        transform:
-          scale(1);
-
-      }
-
-
-      /* =====================================
-         LISTENING
-      ===================================== */
-
-      body[data-av-state="listening"] .core-section {
-
-        background:
-          radial-gradient(
-            circle at center,
-            rgba(0, 96, 180, 0.42),
-            rgba(7, 16, 35, 0.96) 58%,
-            #02060e 100%
-          );
-
-        box-shadow:
-          inset 0 0 70px rgba(0, 180, 255, 0.18),
-          0 0 55px rgba(0, 180, 255, 0.18);
-
-      }
-
-      body[data-av-state="listening"] .av-core {
-
-        transform:
-          scale(1.08);
-
-        filter:
-          drop-shadow(
-            0 0 25px rgba(0, 200, 255, 0.45)
-          );
-
-      }
-
-      body[data-av-state="listening"] .core-inner {
-
-        border-color:
-          rgba(80, 217, 255, 0.95);
-
-        background:
-          radial-gradient(
-            circle at 35% 30%,
-            #153f67,
-            #071522 72%
-          );
-
-        box-shadow:
-          0 0 35px rgba(80, 217, 255, 0.80),
-          inset 0 0 30px rgba(80, 217, 255, 0.22);
-
-      }
-
-      body[data-av-state="listening"] .ring-one {
-
-        border-top-color:
-          #50d9ff;
-
-        border-right-color:
-          #278bff;
-
-        box-shadow:
-          0 0 25px rgba(80, 217, 255, 0.85);
-
-      }
-
-      body[data-av-state="listening"] .ring-two {
-
-        border-bottom-color:
-          #35c9ff;
-
-        border-left-color:
-          #477aff;
-
-        box-shadow:
-          0 0 28px rgba(61, 139, 255, 0.70);
-
-      }
-
-      body[data-av-state="listening"] .status-dot {
-
-        background:
-          #50d9ff;
-
-        box-shadow:
-          0 0 15px rgba(80, 217, 255, 1);
-
-      }
-
-
-      /* =====================================
-         THINKING
-      ===================================== */
-
-      body[data-av-state="thinking"] .core-section {
-
-        background:
-          radial-gradient(
-            circle at center,
-            rgba(110, 38, 180, 0.52),
-            rgba(19, 7, 37, 0.97) 58%,
-            #04020b 100%
-          );
-
-        box-shadow:
-          inset 0 0 80px rgba(180, 70, 255, 0.22),
-          0 0 65px rgba(155, 92, 255, 0.22);
-
-      }
-
-      body[data-av-state="thinking"] .av-core {
-
-        transform:
-          scale(1.10);
-
-        filter:
-          drop-shadow(
-            0 0 32px rgba(190, 70, 255, 0.55)
-          );
-
-      }
-
-      body[data-av-state="thinking"] .core-inner {
-
-        border-color:
-          #d47cff;
-
-        background:
-          radial-gradient(
-            circle at 35% 30%,
-            #5d247d,
-            #180923 72%
-          );
-
-        box-shadow:
-          0 0 45px rgba(199, 90, 255, 0.90),
-          inset 0 0 35px rgba(190, 70, 255, 0.30);
-
-      }
-
-      body[data-av-state="thinking"] .ring-one {
-
-        border-top-color:
-          #e17cff;
-
-        border-right-color:
-          #914dff;
-
-        box-shadow:
-          0 0 30px rgba(210, 100, 255, 0.95);
-
-        animation-duration:
-          2.5s !important;
-
-      }
-
-      body[data-av-state="thinking"] .ring-two {
-
-        border-bottom-color:
-          #b76cff;
-
-        border-left-color:
-          #6845ff;
-
-        box-shadow:
-          0 0 35px rgba(155, 92, 255, 0.85);
-
-        animation-duration:
-          3.5s !important;
-
-      }
-
-      body[data-av-state="thinking"] .ring-three {
-
-        border-top-color:
-          #df8cff;
-
-        border-bottom-color:
-          #8c5cff;
-
-        opacity:
-          0.95;
-
-        animation-duration:
-          5s !important;
-
-      }
-
-      body[data-av-state="thinking"] .status-dot {
-
-        background:
-          #c77dff;
-
-        box-shadow:
-          0 0 18px rgba(199, 125, 255, 1);
-
-      }
-
-
-      /* =====================================
-         SPEAKING
-      ===================================== */
-
-      body[data-av-state="speaking"] .core-section {
-
-        background:
-          radial-gradient(
-            circle at center,
-            rgba(45, 75, 170, 0.50),
-            rgba(15, 8, 38, 0.96) 58%,
-            #03040b 100%
-          );
-
-        box-shadow:
-          inset 0 0 85px rgba(80, 217, 255, 0.16),
-          0 0 70px rgba(155, 92, 255, 0.25);
-
-      }
-
-      body[data-av-state="speaking"] .av-core {
-
-        transform:
-          scale(1.12);
-
-        filter:
-          drop-shadow(
-            0 0 38px rgba(80, 217, 255, 0.55)
-          );
-
-      }
-
-      body[data-av-state="speaking"] .core-inner {
-
-        border-color:
-          #c77dff;
-
-        background:
-          radial-gradient(
-            circle at 35% 30%,
-            #4e2d87,
-            #11152f 72%
-          );
-
-        box-shadow:
-          0 0 48px rgba(80, 217, 255, 0.55),
-          0 0 70px rgba(199, 125, 255, 0.45),
-          inset 0 0 35px rgba(80, 217, 255, 0.20);
-
-        animation:
-          speakingPulse 1.15s ease-in-out infinite !important;
-
-      }
-
-      body[data-av-state="speaking"] .ring-one {
-
-        border-top-color:
-          #e28cff;
-
-        border-right-color:
-          #50d9ff;
-
-        box-shadow:
-          0 0 30px rgba(80, 217, 255, 0.75);
-
-      }
-
-      body[data-av-state="speaking"] .ring-two {
-
-        border-bottom-color:
-          #50d9ff;
-
-        border-left-color:
-          #a85cff;
-
-        box-shadow:
-          0 0 35px rgba(155, 92, 255, 0.75);
-
-      }
-
-      body[data-av-state="speaking"] .status-dot {
-
-        background:
-          #50d9ff;
-
-        box-shadow:
-          0 0 18px rgba(80, 217, 255, 1);
-
-      }
-
-
-      /* =====================================
-         REVEAL
-      ===================================== */
-
-      body[data-av-state="reveal"] .core-section {
-
-        background:
-          radial-gradient(
-            circle at center,
-            rgba(155, 25, 190, 0.58),
-            rgba(25, 5, 45, 0.97) 58%,
-            #05010b 100%
-          );
-
-        box-shadow:
-          inset 0 0 100px rgba(255, 70, 220, 0.25),
-          0 0 90px rgba(210, 70, 255, 0.30);
-
-      }
-
-      body[data-av-state="reveal"] .av-core {
-
-        transform:
-          scale(1.20);
-
-        filter:
-          drop-shadow(
-            0 0 45px rgba(255, 70, 220, 0.75)
-          );
-
-      }
-
-      body[data-av-state="reveal"] .core-inner {
-
-        border-color:
-          #ff7ce8;
-
-        background:
-          radial-gradient(
-            circle at 35% 30%,
-            #722c85,
-            #220622 72%
-          );
-
-        box-shadow:
-          0 0 55px rgba(255, 70, 220, 0.90),
-          0 0 90px rgba(155, 92, 255, 0.60),
-          inset 0 0 40px rgba(255, 100, 220, 0.28);
-
-      }
-
-      body[data-av-state="reveal"] .ring-one {
-
-        border-top-color:
-          #ff83e9;
-
-        border-right-color:
-          #bd5cff;
-
-        box-shadow:
-          0 0 35px rgba(255, 90, 220, 0.95);
-
-        animation-duration:
-          4s !important;
-
-      }
-
-      body[data-av-state="reveal"] .ring-two {
-
-        border-bottom-color:
-          #ff55d7;
-
-        border-left-color:
-          #6f5cff;
-
-        box-shadow:
-          0 0 40px rgba(255, 80, 220, 0.80);
-
-      }
-
-      body[data-av-state="reveal"] .ring-three {
-
-        border-top-color:
-          #ff72e8;
-
-        border-bottom-color:
-          #8b6cff;
-
-        opacity:
-          1;
-
-      }
-
-      body[data-av-state="reveal"] .status-dot {
-
-        background:
-          #ff6cdd;
-
-        box-shadow:
-          0 0 20px rgba(255, 100, 220, 1);
-
-      }
-
-
-      /* =====================================
-         SPEAKING PULSE
-      ===================================== */
-
-      @keyframes speakingPulse {
-
-        0%, 100% {
-          transform: scale(0.96);
-        }
-
-        50% {
-          transform: scale(1.07);
-        }
-
-      }
-
-    `;
-
-    document.head.appendChild(style);
+    return;
   }
 
 
-  installStateStyles();
+  console.log(
+    "✅ AV → Master Core connected."
+  );
 
 
   /* =========================================
@@ -601,11 +81,13 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!SpeechRecognition) {
 
     console.error(
-      "AV SPEECH → Speech Recognition not supported."
+      "AV → Speech Recognition is not supported."
     );
 
-    micButton.title =
-      "Speech recognition is not supported";
+    if (messageBox) {
+      messageBox.textContent =
+        "Speech recognition is not supported in this browser.";
+    }
 
     return;
   }
@@ -615,162 +97,58 @@ document.addEventListener("DOMContentLoaded", function () {
     new SpeechRecognition();
 
 
-  recognition.continuous =
-    false;
+  recognition.continuous = false;
 
-  recognition.interimResults =
-    false;
+  recognition.interimResults = false;
 
-  recognition.lang =
-    "en-IN";
+  recognition.lang = "en-IN";
 
 
   /* =========================================
-     STATE VARIABLES
+     STATE
   ========================================= */
 
-  let isListening =
-    false;
+  let isListening = false;
 
-  let isSpeaking =
-    false;
+  let isSpeaking = false;
 
-  let recognitionActive =
-    false;
-
-  let isThinking =
-    false;
-
-  let currentUtterance =
-    null;
+  let currentUtterance = null;
 
 
   /* =========================================
-     APPLY AV STATE
+     STATUS
   ========================================= */
 
-  function applyState(state) {
-
-    const normalized =
-      String(state || "standby")
-        .toLowerCase()
-        .trim();
-
-
-    document.body.dataset.avState =
-      normalized;
-
-
-    /*
-      Optional external AV_UI
-    */
-
-    if (
-      window.AV_UI &&
-      typeof window.AV_UI.setState ===
-      "function"
-    ) {
-
-      try {
-
-        window.AV_UI.setState(
-          normalized
-        );
-
-      } catch (error) {
-
-        console.warn(
-          "AV_UI STATE ERROR:",
-          error
-        );
-
-      }
-
-    }
-
-
-    /*
-      Visible status text
-    */
-
-    const labels = {
-
-      standby:
-        "STANDBY",
-
-      listening:
-        "LISTENING",
-
-      thinking:
-        "THINKING",
-
-      speaking:
-        "AV SPEAKING",
-
-      reveal:
-        "REVEAL"
-
-    };
-
-
-    if (statusText) {
-
-      statusText.textContent =
-        labels[normalized] ||
-        "STANDBY";
-
-    }
-
-
-    /*
-      Status dot
-    */
-
-    if (statusDot) {
-
-      statusDot.classList
-        .remove(
-          "state-standby",
-          "state-listening",
-          "state-thinking",
-          "state-speaking",
-          "state-reveal"
-        );
-
-      statusDot.classList
-        .add(
-          "state-" + normalized
-        );
-
-    }
-
-
-    /*
-      Helpful browser-console log
-    */
+  function setStatus(status) {
 
     console.log(
-      "💜 AV UI STATE →",
-      normalized.toUpperCase()
+      "AV STATUS →",
+      status
     );
+
+
+    /*
+      Support the current UI.
+    */
+
+    const statusElement =
+      document.querySelector(
+        ".ai-status p"
+      );
+
+
+    if (statusElement) {
+
+      statusElement.textContent =
+        status;
+
+    }
 
   }
 
 
   /* =========================================
-     PUBLIC STATE ACCESS
-  ========================================= */
-
-  window.AV_STATE =
-    function (state) {
-
-      applyState(state);
-
-    };
-
-
-  /* =========================================
-     SPEECH TEXT CLEANER
+     CLEAN TEXT
   ========================================= */
 
   function cleanSpeechText(text) {
@@ -823,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /* =========================================
-     STOP BROWSER SPEECH
+     STOP SPEAKING
   ========================================= */
 
   function stopSpeaking() {
@@ -835,7 +213,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (error) {
 
       console.warn(
-        "AV SPEECH STOP:",
+        "AV → Speech stop error:",
         error
       );
 
@@ -852,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /* =========================================
-     FIND BEST BROWSER VOICE
+     FIND BROWSER VOICE
   ========================================= */
 
   function getPreferredVoice() {
@@ -863,67 +241,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     if (!voices.length) {
-
       return null;
-
     }
 
 
-    const preferredNames = [
-
-      "Microsoft Heera",
-      "Microsoft Neerja",
-      "Microsoft Aditi",
-      "Google हिन्दी",
-      "Google Hindi",
-      "Google UK English Female",
-      "Google US English Female"
-
-    ];
-
-
-    for (
-      const preferredName
-      of preferredNames
-    ) {
-
-      const voice =
-        voices.find(
-          function (item) {
-
-            return item.name
-              .toLowerCase()
-              .includes(
-                preferredName
-                  .toLowerCase()
-              );
-
-          }
-        );
-
-
-      if (voice) {
-
-        return voice;
-
-      }
-
-    }
-
+    /*
+      Prefer Indian voices first.
+    */
 
     const indianVoice =
       voices.find(
         function (voice) {
 
-          const language =
+          const lang =
             String(
               voice.lang || ""
             ).toLowerCase();
 
 
           return (
-            language === "en-in" ||
-            language === "hi-in"
+            lang === "en-in" ||
+            lang === "hi-in"
           );
 
         }
@@ -931,11 +269,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     if (indianVoice) {
-
       return indianVoice;
-
     }
 
+
+    /*
+      Then any English voice.
+    */
 
     const englishVoice =
       voices.find(
@@ -951,16 +291,13 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
 
-    return (
-      englishVoice ||
-      voices[0]
-    );
+    return englishVoice || voices[0];
 
   }
 
 
   /* =========================================
-     BROWSER TTS
+     BROWSER TEXT TO SPEECH
   ========================================= */
 
   function speak(text) {
@@ -974,14 +311,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!cleanText) {
 
-          applyState(
-            "standby"
+          console.warn(
+            "AV → Nothing to speak."
           );
 
           resolve();
 
           return;
-
         }
 
 
@@ -993,28 +329,23 @@ document.addEventListener("DOMContentLoaded", function () {
         ) {
 
           console.error(
-            "AV SPEECH → Browser speech synthesis unavailable."
-          );
-
-          applyState(
-            "standby"
+            "AV → Browser TTS unavailable."
           );
 
           resolve();
 
           return;
-
         }
 
 
         console.log(
-          "🔊 AV SPEECH →",
+          "🔊 AV → Speaking:",
           cleanText
         );
 
 
-        applyState(
-          "speaking"
+        setStatus(
+          "AV SPEAKING"
         );
 
 
@@ -1037,6 +368,9 @@ document.addEventListener("DOMContentLoaded", function () {
           utterance.voice =
             voice;
 
+          utterance.lang =
+            voice.lang;
+
 
           console.log(
             "🔊 AV VOICE →",
@@ -1044,21 +378,19 @@ document.addEventListener("DOMContentLoaded", function () {
             voice.lang
           );
 
+        } else {
+
+          utterance.lang =
+            "en-IN";
+
         }
-
-
-        utterance.lang =
-          voice?.lang ||
-          "en-IN";
 
 
         utterance.rate =
           0.95;
 
-
         utterance.pitch =
           1.05;
-
 
         utterance.volume =
           1.0;
@@ -1070,9 +402,8 @@ document.addEventListener("DOMContentLoaded", function () {
             isSpeaking =
               true;
 
-
-            applyState(
-              "speaking"
+            setStatus(
+              "AV SPEAKING"
             );
 
           };
@@ -1081,9 +412,13 @@ document.addEventListener("DOMContentLoaded", function () {
         utterance.onend =
           function () {
 
+            console.log(
+              "🔊 AV → Speech finished."
+            );
+
+
             isSpeaking =
               false;
-
 
             currentUtterance =
               null;
@@ -1091,8 +426,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!isListening) {
 
-              applyState(
-                "standby"
+              setStatus(
+                "AV ONLINE"
               );
 
             }
@@ -1107,7 +442,7 @@ document.addEventListener("DOMContentLoaded", function () {
           function (event) {
 
             console.error(
-              "AV SPEECH SYNTHESIS ERROR:",
+              "AV TTS ERROR:",
               event.error
             );
 
@@ -1115,13 +450,12 @@ document.addEventListener("DOMContentLoaded", function () {
             isSpeaking =
               false;
 
-
             currentUtterance =
               null;
 
 
-            applyState(
-              "standby"
+            setStatus(
+              "AV ONLINE"
             );
 
 
@@ -1129,6 +463,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
           };
 
+
+        /*
+          Small delay helps some
+          Android browsers.
+        */
 
         setTimeout(
           function () {
@@ -1143,7 +482,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } catch (error) {
 
               console.error(
-                "AV SPEECH START ERROR:",
+                "AV TTS START ERROR:",
                 error
               );
 
@@ -1151,13 +490,12 @@ document.addEventListener("DOMContentLoaded", function () {
               isSpeaking =
                 false;
 
-
               currentUtterance =
                 null;
 
 
-              applyState(
-                "standby"
+              setStatus(
+                "AV ONLINE"
               );
 
 
@@ -1166,7 +504,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
           },
-          80
+          100
         );
 
       }
@@ -1176,13 +514,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /* =========================================
-     LOAD BROWSER VOICES
+     LOAD VOICES
   ========================================= */
 
   if (
-    "onvoiceschanged"
-    in window.speechSynthesis
+    window.speechSynthesis
   ) {
+
+    window.speechSynthesis
+      .getVoices();
+
 
     window.speechSynthesis
       .onvoiceschanged =
@@ -1194,7 +535,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         console.log(
-          "🔊 AV VOICES LOADED:",
+          "🔊 AV → Voices loaded:",
           voices.length
         );
 
@@ -1203,160 +544,74 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
 
-  window.speechSynthesis
-    .getVoices();
-
-
-  /* =========================================
-     REVEAL COMMAND DETECTION
-  ========================================= */
-
-  function isRevealCommand(message) {
-
-    const 
-      text =
-        String(message || "")
-          .toLowerCase()
-          .trim();
-
-
-    const revealKeywords = [
-
-      "अपने दर्शन",
-      "दर्शन कराओ",
-      "दर्शन तो कराओ",
-      "अपना चेहरा",
-      "चेहरा तो दिखाओ",
-      "चेहरा दिखाओ",
-      "खुद को दिखाओ",
-      "तुम्हें देखना चाहते",
-      "तुम्हारा चेहरा",
-      "show yourself",
-      "show your face",
-      "show yourself av",
-      "reveal yourself",
-      "reveal av"
-
-    ];
-
-
-    return revealKeywords.some(
-      function (keyword) {
-
-        return text.includes(
-          keyword
-        );
-
-      }
-    );
-
-  }
-
-
-  /* =========================================
-     REVEAL STATE
-  ========================================= */
-
-  function triggerReveal() {
-
-    console.log(
-      "✨ AV → REVEAL TRIGGERED"
-    );
-
-
-    setState("reveal");
-
-
-    /*
-      Keep reveal state visible
-      briefly before normal flow.
-    */
-
-    setTimeout(function () {
-
-      if (!isSpeaking &&
-          !isListening) {
-
-        setState("standby");
-
-      }
-
-    }, 3500);
-
-  }
-
-
   /* =========================================
      PROCESS MESSAGE
   ========================================= */
 
-  async function processVoiceMessage(
+  async function processMessage(
     message
   ) {
 
-    const original =
+    const text =
       String(message || "")
         .trim();
 
 
-    if (!original) {
+    if (!text) {
       return;
     }
 
 
     console.log(
       "🎤 AV USER →",
-      original
+      text
     );
 
 
     /*
-      Reveal command detection.
+      AI is thinking.
     */
 
-    if (
-      isRevealCommand(
-        original
-      )
-    ) {
-
-      triggerReveal();
-
-    }
-
-
-    /*
-      AI processing starts.
-    */
-
-    setState("thinking");
+    setStatus(
+      "THINKING"
+    );
 
 
     try {
 
+      console.log(
+        "🧠 AV → Sending to Master Core..."
+      );
+
+
       const result =
         await window.VYRA_MASTER
           .process(
-            original
+            text
           );
 
 
       console.log(
-        "🧠 AV AI RESULT →",
+        "🧠 AV → Master result:",
         result
       );
 
 
-      let reply = "";
+      let reply =
+        "";
 
 
-      if (result?.reply) {
+      if (
+        result &&
+        result.reply
+      ) {
 
         reply =
           result.reply;
 
       } else if (
-        result?.message
+        result &&
+        result.message
       ) {
 
         reply =
@@ -1368,13 +623,16 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!reply) {
 
         console.error(
-          "AV SPEECH → Empty AI response."
+          "AV → Empty AI reply."
         );
 
-        setState("standby");
+
+        setStatus(
+          "AV ONLINE"
+        );
+
 
         return;
-
       }
 
 
@@ -1385,7 +643,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
       /*
-        Browser speaks the response.
+        Now speak the reply.
       */
 
       await speak(
@@ -1396,12 +654,22 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (error) {
 
       console.error(
-        "AV SPEECH ERROR:",
+        "❌ AV MESSAGE ERROR:",
         error
       );
 
 
-      setState("standby");
+      setStatus(
+        "AV ONLINE"
+      );
+
+
+      if (messageBox) {
+
+        messageBox.textContent =
+          "AV connection में problem आ गई।";
+
+      }
 
     }
 
@@ -1414,24 +682,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function startListening() {
 
-    if (isSpeaking) {
+    /*
+      Stop current speech first.
+    */
 
-      console.log(
-        "AV SPEECH → Stopping current speech."
-      );
+    if (isSpeaking) {
 
       stopSpeaking();
 
     }
 
 
-    if (
-      isListening ||
-      recognitionActive
-    ) {
+    if (isListening) {
 
       console.log(
-        "AV SPEECH → Already listening."
+        "AV → Already listening."
       );
 
       return;
@@ -1447,20 +712,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
       recognition.start();
 
-
-      recognitionActive =
-        true;
-
-
     } catch (error) {
 
       console.warn(
-        "AV SPEECH START:",
+        "AV → Recognition start:",
         error
       );
-
-      recognitionActive =
-        false;
 
     }
 
@@ -1468,7 +725,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /* =========================================
-     SPEECH RECOGNITION — START
+     RECOGNITION START
   ========================================= */
 
   recognition.onstart =
@@ -1477,24 +734,21 @@ document.addEventListener("DOMContentLoaded", function () {
       isListening =
         true;
 
-      recognitionActive =
-        true;
-
 
       console.log(
         "🎤 AV → LISTENING"
       );
 
 
-      setState(
-        "listening"
+      setStatus(
+        "LISTENING"
       );
 
     };
 
 
   /* =========================================
-     SPEECH RECOGNITION — RESULT
+     RECOGNITION RESULT
   ========================================= */
 
   recognition.onresult =
@@ -1520,21 +774,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (!transcript) {
 
-        setState(
-          "standby"
+        setStatus(
+          "AV ONLINE"
         );
 
         return;
-
       }
 
 
-      setState(
-        "thinking"
-      );
+      /*
+        Stop listening state.
+      */
+
+      isListening =
+        false;
 
 
-      processVoiceMessage(
+      /*
+        Process with AI.
+      */
+
+      processMessage(
         transcript
       );
 
@@ -1542,7 +802,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /* =========================================
-     SPEECH RECOGNITION — END
+     RECOGNITION END
   ========================================= */
 
   recognition.onend =
@@ -1551,19 +811,21 @@ document.addEventListener("DOMContentLoaded", function () {
       isListening =
         false;
 
-      recognitionActive =
-        false;
-
 
       console.log(
-        "🎤 AV → LISTENING ENDED"
+        "🎤 AV → Listening ended."
       );
 
 
       if (!isSpeaking) {
 
+        /*
+          Don't immediately overwrite
+          THINKING if AI is processing.
+        */
+
         console.log(
-          "AV → Recognition ended."
+          "AV → Waiting for response..."
         );
 
       }
@@ -1572,7 +834,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /* =========================================
-     SPEECH RECOGNITION — ERROR
+     RECOGNITION ERROR
   ========================================= */
 
   recognition.onerror =
@@ -1581,13 +843,15 @@ document.addEventListener("DOMContentLoaded", function () {
       isListening =
         false;
 
-      recognitionActive =
-        false;
-
 
       console.error(
-        "AV SPEECH RECOGNITION ERROR:",
+        "❌ AV MIC ERROR:",
         event.error
+      );
+
+
+      setStatus(
+        "AV ONLINE"
       );
 
 
@@ -1614,32 +878,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       }
 
-
-      if (
-        event.error ===
-        "aborted"
-      ) {
-
-        console.log(
-          "AV → Recognition aborted."
-        );
-
-      }
-
-
-      if (!isSpeaking) {
-
-        setState(
-          "standby"
-        );
-
-      }
-
     };
 
 
   /* =========================================
-     MICROPHONE BUTTON
+     MIC BUTTON
   ========================================= */
 
   micButton.addEventListener(
@@ -1658,7 +901,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /* =========================================
-     OPTIONAL TEXT INPUT
+     TEXT SEND
   ========================================= */
 
   if (
@@ -1668,7 +911,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     sendButton.addEventListener(
       "click",
-      async function () {
+      function () {
 
         const message =
           input.value.trim();
@@ -1683,7 +926,7 @@ document.addEventListener("DOMContentLoaded", function () {
           "";
 
 
-        await processVoiceMessage(
+        processMessage(
           message
         );
 
@@ -1716,7 +959,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "";
 
 
-          processVoiceMessage(
+          processMessage(
             message
           );
 
@@ -1732,8 +975,8 @@ document.addEventListener("DOMContentLoaded", function () {
      INITIAL STATE
   ========================================= */
 
-  setState(
-    "standby"
+  setStatus(
+    "AV ONLINE"
   );
 
 
@@ -1742,19 +985,20 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 
   console.log(
-    "AV SPEECH SYSTEM: ONLINE"
+    "✅ AV VOICE SYSTEM: ONLINE"
   );
 
   console.log(
-    "AV BROWSER TTS: CONNECTED"
+    "✅ Browser Speech Recognition: READY"
   );
 
   console.log(
-    "AV UI STATES: READY"
+    "✅ Browser Speech Synthesis: READY"
   );
 
   console.log(
     "================================="
+
   );
 
 });
