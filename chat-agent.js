@@ -2,34 +2,45 @@ const ChatAgent = {
 
   name: "Chat Agent",
 
+
   async handle(message) {
 
-    const original = String(message || "").trim();
+    const original =
+      String(message || "").trim();
+
 
     if (!original) {
 
       return {
+
         success: true,
-        reply: "Boss, मैं सुन रही हूँ। आप क्या कहना चाहते हैं?"
+
+        reply:
+          "Boss, मैं सुन रही हूँ।"
+
       };
 
     }
 
+
     try {
 
-      // =========================================
-      // MEMORY — SAVE USER MESSAGE
-      // =========================================
+
+      /* =====================================
+         MEMORY — SAVE USER MESSAGE
+      ===================================== */
 
       if (
         window.MemoryAgent &&
-        typeof window.MemoryAgent.remember === "function"
+        typeof window.MemoryAgent.remember ===
+          "function"
       ) {
 
         window.MemoryAgent.remember(
           "user",
           original
         );
+
 
         console.log(
           "🧠 VYRA MEMORY → User message saved"
@@ -38,32 +49,53 @@ const ChatAgent = {
       }
 
 
-      // =========================================
-      // MEMORY — GET PREVIOUS CONTEXT
-      // =========================================
+      /* =====================================
+         MEMORY — SMART CONTEXT
+      ===================================== */
 
       let memoryContext = "";
 
+
       if (
         window.MemoryAgent &&
-        typeof window.MemoryAgent.buildContext === "function"
+        typeof window.MemoryAgent.buildSmartContext ===
+          "function"
       ) {
 
         memoryContext =
-          window.MemoryAgent.buildContext(20);
+          window.MemoryAgent
+            .buildSmartContext(
+              original
+            );
+
+      }
+
+      /*
+        Fallback for safety.
+      */
+
+      else if (
+        window.MemoryAgent &&
+        typeof window.MemoryAgent.buildContext ===
+          "function"
+      ) {
+
+        memoryContext =
+          window.MemoryAgent
+            .buildContext(20);
 
       }
 
 
       console.log(
-        "🧠 VYRA MEMORY → Context:",
+        "🧠 VYRA MEMORY → Smart context:",
         memoryContext
       );
 
 
-      // =========================================
-      // SEND REQUEST TO BACKEND
-      // =========================================
+      /* =====================================
+         SEND TO BACKEND
+      ===================================== */
 
       console.log(
         "VYRA CHAT AGENT → Sending request:",
@@ -76,26 +108,34 @@ const ChatAgent = {
       );
 
 
-      const response = await fetch(
-        "/api/chat",
-        {
+      const response =
+        await fetch(
+          "/api/chat",
+          {
 
-          method: "POST",
+            method:
+              "POST",
 
-          headers: {
-            "Content-Type": "application/json"
-          },
+            headers: {
 
-          body: JSON.stringify({
+              "Content-Type":
+                "application/json"
 
-            message: original,
+            },
 
-            memory: memoryContext
+            body:
+              JSON.stringify({
 
-          })
+                message:
+                  original,
 
-        }
-      );
+                memory:
+                  memoryContext
+
+              })
+
+          }
+        );
 
 
       console.log(
@@ -103,9 +143,9 @@ const ChatAgent = {
       );
 
 
-      // =========================================
-      // READ RESPONSE
-      // =========================================
+      /* =====================================
+         READ RESPONSE
+      ===================================== */
 
       const raw =
         await response.text();
@@ -140,9 +180,9 @@ const ChatAgent = {
       );
 
 
-      // =========================================
-      // ERROR CHECK
-      // =========================================
+      /* =====================================
+         ERROR CHECK
+      ===================================== */
 
       if (!response.ok) {
 
@@ -156,9 +196,9 @@ const ChatAgent = {
       }
 
 
-      // =========================================
-      // GET REPLY
-      // =========================================
+      /* =====================================
+         GET REPLY
+      ===================================== */
 
       const reply =
 
@@ -169,19 +209,21 @@ const ChatAgent = {
         "Boss, backend से कोई response नहीं मिला।";
 
 
-      // =========================================
-      // MEMORY — SAVE VYRA REPLY
-      // =========================================
+      /* =====================================
+         SAVE ASSISTANT RESPONSE
+      ===================================== */
 
       if (
         window.MemoryAgent &&
-        typeof window.MemoryAgent.remember === "function"
+        typeof window.MemoryAgent.remember ===
+          "function"
       ) {
 
         window.MemoryAgent.remember(
           "assistant",
           reply
         );
+
 
         console.log(
           "🧠 VYRA MEMORY → Assistant reply saved"
@@ -190,15 +232,13 @@ const ChatAgent = {
       }
 
 
-      // =========================================
-      // RETURN
-      // =========================================
-
       return {
 
-        success: true,
+        success:
+          true,
 
-        reply: reply
+        reply:
+          reply
 
       };
 
@@ -215,7 +255,8 @@ const ChatAgent = {
 
       return {
 
-        success: false,
+        success:
+          false,
 
         reply:
           "Boss, Chat Agent Error: " +
@@ -233,9 +274,9 @@ const ChatAgent = {
 };
 
 
-// =========================================
-// GLOBAL CONNECTION
-// =========================================
+/* =========================================
+   GLOBAL CONNECTION
+========================================= */
 
 window.ChatAgent =
   ChatAgent;
