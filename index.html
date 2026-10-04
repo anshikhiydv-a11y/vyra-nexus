@@ -642,4 +642,581 @@
         0 10px 35px rgba(0, 0, 0, 0.35),
         inset 0 0 20px rgba(84, 91, 255, 0.07);
 
-      backdrop-filter:
+      backdrop-filter: blur(16px);
+    }
+
+
+    .dock-button {
+      width: 48px;
+      height: 48px;
+
+      margin: auto;
+
+      border:
+        1px solid rgba(103, 112, 255, 0.18);
+
+      border-radius: 50%;
+
+      background:
+        rgba(27, 35, 78, 0.65);
+
+      color: #c7d0ff;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 19px;
+
+      cursor: pointer;
+    }
+
+
+    .dock-button:active {
+      transform: scale(0.91);
+    }
+
+
+    /* =========================================
+       MAIN MICROPHONE
+    ========================================= */
+
+    .mic {
+      position: relative;
+
+      width: 64px;
+      height: 64px;
+
+      margin: auto;
+
+      border:
+        2px solid rgba(203, 105, 255, 0.90);
+
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          #7440ff,
+          #32126e 62%,
+          #120923 100%
+        );
+
+      color: white;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 27px;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 0 18px rgba(154, 72, 255, 0.75),
+        0 0 40px rgba(78, 96, 255, 0.25);
+
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+    }
+
+
+    .mic::before {
+      content: "";
+
+      position: absolute;
+
+      inset: -6px;
+
+      border-radius: 50%;
+
+      border:
+        1px solid rgba(87, 159, 255, 0.30);
+
+      animation:
+        micPulse 2.4s ease-in-out infinite;
+    }
+
+
+    .mic:active {
+      transform: scale(0.91);
+
+      box-shadow:
+        0 0 30px rgba(183, 85, 255, 0.95);
+    }
+
+
+    /* =========================================
+       DESKTOP
+    ========================================= */
+
+    @media (min-width: 700px) {
+
+      .app {
+        max-width: 760px;
+
+        padding-top: 24px;
+      }
+
+      .core-stage {
+        height: 570px;
+      }
+
+      .av-core {
+        transform: scale(1.18);
+      }
+
+      .control-dock {
+        margin-top: 30px;
+      }
+    }
+
+
+    /* =========================================
+       ANIMATIONS
+    ========================================= */
+
+    @keyframes spin {
+
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+
+    }
+
+
+    @keyframes spinReverse {
+
+      from {
+        transform: rotate(360deg);
+      }
+
+      to {
+        transform: rotate(0deg);
+      }
+
+    }
+
+
+    @keyframes slowSpin {
+
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(-360deg);
+      }
+
+    }
+
+
+    @keyframes corePulse {
+
+      0%,
+      100% {
+        transform: scale(0.96);
+      }
+
+      50% {
+        transform: scale(1.04);
+      }
+
+    }
+
+
+    @keyframes stageBreath {
+
+      0%,
+      100% {
+        transform: scale(0.88);
+        opacity: 0.65;
+      }
+
+      50% {
+        transform: scale(1.08);
+        opacity: 1;
+      }
+
+    }
+
+
+    @keyframes particleFloat {
+
+      0%,
+      100% {
+        transform:
+          translateY(0)
+          scale(0.7);
+
+        opacity: 0.35;
+      }
+
+      50% {
+        transform:
+          translateY(-15px)
+          scale(1.25);
+
+        opacity: 1;
+      }
+
+    }
+
+
+    @keyframes statusPulse {
+
+      0%,
+      100% {
+        transform: scale(0.8);
+        opacity: 0.55;
+      }
+
+      50% {
+        transform: scale(1.15);
+        opacity: 1;
+      }
+
+    }
+
+
+    @keyframes micPulse {
+
+      0%,
+      100% {
+        transform: scale(0.94);
+        opacity: 0.35;
+      }
+
+      50% {
+        transform: scale(1.08);
+        opacity: 0.8;
+      }
+
+    }
+
+
+    /* =========================================
+       REDUCE MOTION
+    ========================================= */
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+  <main class="app">
+
+
+    <!-- =====================================
+         TOP BAR
+    ====================================== -->
+
+    <header class="topbar">
+
+      <button
+        class="top-button"
+        type="button"
+        aria-label="Menu"
+      >
+        ☰
+      </button>
+
+
+      <div class="top-brand">
+
+        <!-- CUSTOM AV LOGO -->
+
+        <svg
+          class="av-logo"
+          viewBox="0 0 160 90"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-label="AV"
+        >
+
+          <defs>
+
+            <linearGradient
+              id="topAVGradient"
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="1"
+            >
+
+              <stop
+                offset="0%"
+                stop-color="#ffffff"
+              />
+
+              <stop
+                offset="38%"
+                stop-color="#bd67ff"
+              />
+
+              <stop
+                offset="72%"
+                stop-color="#8061ff"
+              />
+
+              <stop
+                offset="100%"
+                stop-color="#45d7ff"
+              />
+
+            </linearGradient>
+
+          </defs>
+
+
+          <!-- futuristic A -->
+
+          <path
+            d="M8 78 L43 10 L60 10 L91 78 L72 78 L64 59 L34 59 L26 78 Z
+               M41 44 L57 44 L49 25 Z"
+            fill="url(#topAVGradient)"
+          />
+
+
+          <!-- futuristic V -->
+
+          <path
+            d="M78 10 L97 10 L111 54 L126 10 L145 10 L119 78 L103 78 Z"
+            fill="url(#topAVGradient)"
+          />
+
+        </svg>
+
+
+        <div class="brand-subtitle">
+          AI ASSISTANT
+        </div>
+
+      </div>
+
+
+      <button
+        class="top-button"
+        type="button"
+        aria-label="Settings"
+      >
+        ⚙
+      </button>
+
+    </header>
+
+
+    <!-- =====================================
+         AV CORE
+    ====================================== -->
+
+    <section
+      class="core-stage"
+      aria-label="AV Core"
+    >
+
+      <div class="stage-glow"></div>
+
+
+      <div
+        class="av-core"
+        role="button"
+        tabindex="0"
+        aria-label="AV Core"
+      >
+
+
+        <!-- Energy -->
+
+        <div class="energy energy-one"></div>
+
+        <div class="energy energy-two"></div>
+
+        <div class="energy energy-three"></div>
+
+        <div class="energy energy-four"></div>
+
+        <div class="energy-segment segment-a"></div>
+
+        <div class="energy-segment segment-b"></div>
+
+
+        <!-- Core center -->
+
+        <div class="core-center">
+
+
+          <!-- CUSTOM AV LOGO -->
+
+          <svg
+            class="core-logo"
+            viewBox="0 0 160 90"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-label="AV Core"
+          >
+
+            <defs>
+
+              <linearGradient
+                id="coreAVGradient"
+                x1="0"
+                y1="0"
+                x2="1"
+                y2="1"
+              >
+
+                <stop
+                  offset="0%"
+                  stop-color="#ffffff"
+                />
+
+                <stop
+                  offset="40%"
+                  stop-color="#d27aff"
+                />
+
+                <stop
+                  offset="72%"
+                  stop-color="#9d67ff"
+                />
+
+                <stop
+                  offset="100%"
+                  stop-color="#49dfff"
+                />
+
+              </linearGradient>
+
+            </defs>
+
+
+            <path
+              d="M8 78 L43 10 L60 10 L91 78 L72 78 L64 59 L34 59 L26 78 Z
+                 M41 44 L57 44 L49 25 Z"
+              fill="url(#coreAVGradient)"
+            />
+
+
+            <path
+              d="M78 10 L97 10 L111 54 L126 10 L145 10 L119 78 L103 78 Z"
+              fill="url(#coreAVGradient)"
+            />
+
+          </svg>
+
+        </div>
+
+
+        <!-- particles -->
+
+        <span class="particle p1"></span>
+        <span class="particle p2"></span>
+        <span class="particle p3"></span>
+        <span class="particle p4"></span>
+        <span class="particle p5"></span>
+        <span class="particle p6"></span>
+        <span class="particle p7"></span>
+        <span class="particle p8"></span>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================
+         STATUS
+    ====================================== -->
+
+    <div class="ai-status card">
+
+      <span class="status-dot"></span>
+
+      <p>
+        AV ONLINE
+      </p>
+
+    </div>
+
+
+    <div class="core-hint">
+
+      Listening for your command...
+
+    </div>
+
+
+    <!-- =====================================
+         CONTROL DOCK
+    ====================================== -->
+
+    <section class="control-dock">
+
+
+      <button
+        class="dock-button"
+        type="button"
+        aria-label="Keyboard"
+      >
+        ⌨
+      </button>
+
+
+      <button
+        class="mic"
+        type="button"
+        aria-label="Voice input"
+      >
+        🎙
+      </button>
+
+
+      <button
+        class="dock-button"
+        type="button"
+        aria-label="Controls"
+      >
+        ☷
+      </button>
+
+    </section>
+
+
+  </main>
+
+
+  <!-- =====================================
+       AV AGENTS
+  ====================================== -->
+
+  <script src="memory-agent.js"></script>
+
+  <script src="chat-agent.js?v=3"></script>
+
+  <script src="language-agent.js"></script>
+
+  <script src="agents/story-agent.js"></script>
+
+  <script src="master-core.js"></script>
+
+  <script src="app.js"></script>
+
+
+</body>
+
+  </html>
