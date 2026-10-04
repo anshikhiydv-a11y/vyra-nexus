@@ -1,12 +1,12 @@
 /* =========================================
    AV — APP CONTROLLER
-   Browser Speech Edition v3.0
+   Browser Speech Edition v4.0
 
    Speech Recognition
    Browser Speech Synthesis
    Master Core
    Memory
-   AV UI States
+   AV UI STATES
 
    STATES:
    STANDBY
@@ -33,6 +33,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const sendButton =
     document.querySelector(".send");
 
+  const core =
+    document.querySelector(".av-core");
+
+  const coreSection =
+    document.querySelector(".core-section");
+
+  const statusText =
+    document.querySelector(".ai-status p");
+
+  const statusDot =
+    document.querySelector(".status-dot");
+
+
   /* =========================================
      MASTER CORE CHECK
   ========================================= */
@@ -43,12 +56,15 @@ document.addEventListener("DOMContentLoaded", function () {
       "AV → Master Core not found."
     );
 
-    if (window.AV_UI) {
-      window.AV_UI.setState("standby");
-    }
+    setTimeout(function () {
+
+      applyState("standby");
+
+    }, 0);
 
     return;
   }
+
 
   /* =========================================
      MICROPHONE CHECK
@@ -63,11 +79,514 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+
   console.log("=================================");
   console.log("AV SPEECH SYSTEM: INITIALIZING");
   console.log("Master Core: CONNECTED");
   console.log("Browser Speech: READY");
+  console.log("AV UI STATES: READY");
   console.log("=================================");
+
+
+  /* =========================================
+     STATE STYLE SYSTEM
+  ========================================= */
+
+  function installStateStyles() {
+
+    if (document.getElementById("av-state-styles")) {
+      return;
+    }
+
+    const style =
+      document.createElement("style");
+
+    style.id =
+      "av-state-styles";
+
+    style.textContent = `
+
+      /* =====================================
+         AV STATE BASE
+      ===================================== */
+
+      body[data-av-state] .av-core {
+        transition:
+          transform 0.55s ease,
+          filter 0.55s ease;
+      }
+
+      body[data-av-state] .core-section {
+        transition:
+          background 0.7s ease,
+          box-shadow 0.7s ease;
+      }
+
+      body[data-av-state] .core-inner {
+        transition:
+          background 0.7s ease,
+          border-color 0.7s ease,
+          box-shadow 0.7s ease,
+          transform 0.5s ease;
+      }
+
+      body[data-av-state] .core-ring {
+        transition:
+          border-color 0.7s ease,
+          box-shadow 0.7s ease,
+          opacity 0.7s ease;
+      }
+
+      body[data-av-state] .status-dot {
+        transition:
+          background 0.5s ease,
+          box-shadow 0.5s ease,
+          transform 0.3s ease;
+      }
+
+
+      /* =====================================
+         STANDBY
+      ===================================== */
+
+      body[data-av-state="standby"] .core-section {
+
+        background:
+          radial-gradient(
+            circle at center,
+            rgba(52, 24, 100, 0.70),
+            rgba(8, 6, 18, 0.96) 58%,
+            #03040b 100%
+          );
+
+        box-shadow:
+          inset 0 0 55px rgba(111, 56, 255, 0.10),
+          0 0 35px rgba(111, 56, 255, 0.12);
+
+      }
+
+      body[data-av-state="standby"] .av-core {
+
+        transform:
+          scale(1);
+
+      }
+
+
+      /* =====================================
+         LISTENING
+      ===================================== */
+
+      body[data-av-state="listening"] .core-section {
+
+        background:
+          radial-gradient(
+            circle at center,
+            rgba(0, 96, 180, 0.42),
+            rgba(7, 16, 35, 0.96) 58%,
+            #02060e 100%
+          );
+
+        box-shadow:
+          inset 0 0 70px rgba(0, 180, 255, 0.18),
+          0 0 55px rgba(0, 180, 255, 0.18);
+
+      }
+
+      body[data-av-state="listening"] .av-core {
+
+        transform:
+          scale(1.08);
+
+        filter:
+          drop-shadow(
+            0 0 25px rgba(0, 200, 255, 0.45)
+          );
+
+      }
+
+      body[data-av-state="listening"] .core-inner {
+
+        border-color:
+          rgba(80, 217, 255, 0.95);
+
+        background:
+          radial-gradient(
+            circle at 35% 30%,
+            #153f67,
+            #071522 72%
+          );
+
+        box-shadow:
+          0 0 35px rgba(80, 217, 255, 0.80),
+          inset 0 0 30px rgba(80, 217, 255, 0.22);
+
+      }
+
+      body[data-av-state="listening"] .ring-one {
+
+        border-top-color:
+          #50d9ff;
+
+        border-right-color:
+          #278bff;
+
+        box-shadow:
+          0 0 25px rgba(80, 217, 255, 0.85);
+
+      }
+
+      body[data-av-state="listening"] .ring-two {
+
+        border-bottom-color:
+          #35c9ff;
+
+        border-left-color:
+          #477aff;
+
+        box-shadow:
+          0 0 28px rgba(61, 139, 255, 0.70);
+
+      }
+
+      body[data-av-state="listening"] .status-dot {
+
+        background:
+          #50d9ff;
+
+        box-shadow:
+          0 0 15px rgba(80, 217, 255, 1);
+
+      }
+
+
+      /* =====================================
+         THINKING
+      ===================================== */
+
+      body[data-av-state="thinking"] .core-section {
+
+        background:
+          radial-gradient(
+            circle at center,
+            rgba(110, 38, 180, 0.52),
+            rgba(19, 7, 37, 0.97) 58%,
+            #04020b 100%
+          );
+
+        box-shadow:
+          inset 0 0 80px rgba(180, 70, 255, 0.22),
+          0 0 65px rgba(155, 92, 255, 0.22);
+
+      }
+
+      body[data-av-state="thinking"] .av-core {
+
+        transform:
+          scale(1.10);
+
+        filter:
+          drop-shadow(
+            0 0 32px rgba(190, 70, 255, 0.55)
+          );
+
+      }
+
+      body[data-av-state="thinking"] .core-inner {
+
+        border-color:
+          #d47cff;
+
+        background:
+          radial-gradient(
+            circle at 35% 30%,
+            #5d247d,
+            #180923 72%
+          );
+
+        box-shadow:
+          0 0 45px rgba(199, 90, 255, 0.90),
+          inset 0 0 35px rgba(190, 70, 255, 0.30);
+
+      }
+
+      body[data-av-state="thinking"] .ring-one {
+
+        border-top-color:
+          #e17cff;
+
+        border-right-color:
+          #914dff;
+
+        box-shadow:
+          0 0 30px rgba(210, 100, 255, 0.95);
+
+        animation-duration:
+          2.5s !important;
+
+      }
+
+      body[data-av-state="thinking"] .ring-two {
+
+        border-bottom-color:
+          #b76cff;
+
+        border-left-color:
+          #6845ff;
+
+        box-shadow:
+          0 0 35px rgba(155, 92, 255, 0.85);
+
+        animation-duration:
+          3.5s !important;
+
+      }
+
+      body[data-av-state="thinking"] .ring-three {
+
+        border-top-color:
+          #df8cff;
+
+        border-bottom-color:
+          #8c5cff;
+
+        opacity:
+          0.95;
+
+        animation-duration:
+          5s !important;
+
+      }
+
+      body[data-av-state="thinking"] .status-dot {
+
+        background:
+          #c77dff;
+
+        box-shadow:
+          0 0 18px rgba(199, 125, 255, 1);
+
+      }
+
+
+      /* =====================================
+         SPEAKING
+      ===================================== */
+
+      body[data-av-state="speaking"] .core-section {
+
+        background:
+          radial-gradient(
+            circle at center,
+            rgba(45, 75, 170, 0.50),
+            rgba(15, 8, 38, 0.96) 58%,
+            #03040b 100%
+          );
+
+        box-shadow:
+          inset 0 0 85px rgba(80, 217, 255, 0.16),
+          0 0 70px rgba(155, 92, 255, 0.25);
+
+      }
+
+      body[data-av-state="speaking"] .av-core {
+
+        transform:
+          scale(1.12);
+
+        filter:
+          drop-shadow(
+            0 0 38px rgba(80, 217, 255, 0.55)
+          );
+
+      }
+
+      body[data-av-state="speaking"] .core-inner {
+
+        border-color:
+          #c77dff;
+
+        background:
+          radial-gradient(
+            circle at 35% 30%,
+            #4e2d87,
+            #11152f 72%
+          );
+
+        box-shadow:
+          0 0 48px rgba(80, 217, 255, 0.55),
+          0 0 70px rgba(199, 125, 255, 0.45),
+          inset 0 0 35px rgba(80, 217, 255, 0.20);
+
+        animation:
+          speakingPulse 1.15s ease-in-out infinite !important;
+
+      }
+
+      body[data-av-state="speaking"] .ring-one {
+
+        border-top-color:
+          #e28cff;
+
+        border-right-color:
+          #50d9ff;
+
+        box-shadow:
+          0 0 30px rgba(80, 217, 255, 0.75);
+
+      }
+
+      body[data-av-state="speaking"] .ring-two {
+
+        border-bottom-color:
+          #50d9ff;
+
+        border-left-color:
+          #a85cff;
+
+        box-shadow:
+          0 0 35px rgba(155, 92, 255, 0.75);
+
+      }
+
+      body[data-av-state="speaking"] .status-dot {
+
+        background:
+          #50d9ff;
+
+        box-shadow:
+          0 0 18px rgba(80, 217, 255, 1);
+
+      }
+
+
+      /* =====================================
+         REVEAL
+      ===================================== */
+
+      body[data-av-state="reveal"] .core-section {
+
+        background:
+          radial-gradient(
+            circle at center,
+            rgba(155, 25, 190, 0.58),
+            rgba(25, 5, 45, 0.97) 58%,
+            #05010b 100%
+          );
+
+        box-shadow:
+          inset 0 0 100px rgba(255, 70, 220, 0.25),
+          0 0 90px rgba(210, 70, 255, 0.30);
+
+      }
+
+      body[data-av-state="reveal"] .av-core {
+
+        transform:
+          scale(1.20);
+
+        filter:
+          drop-shadow(
+            0 0 45px rgba(255, 70, 220, 0.75)
+          );
+
+      }
+
+      body[data-av-state="reveal"] .core-inner {
+
+        border-color:
+          #ff7ce8;
+
+        background:
+          radial-gradient(
+            circle at 35% 30%,
+            #722c85,
+            #220622 72%
+          );
+
+        box-shadow:
+          0 0 55px rgba(255, 70, 220, 0.90),
+          0 0 90px rgba(155, 92, 255, 0.60),
+          inset 0 0 40px rgba(255, 100, 220, 0.28);
+
+      }
+
+      body[data-av-state="reveal"] .ring-one {
+
+        border-top-color:
+          #ff83e9;
+
+        border-right-color:
+          #bd5cff;
+
+        box-shadow:
+          0 0 35px rgba(255, 90, 220, 0.95);
+
+        animation-duration:
+          4s !important;
+
+      }
+
+      body[data-av-state="reveal"] .ring-two {
+
+        border-bottom-color:
+          #ff55d7;
+
+        border-left-color:
+          #6f5cff;
+
+        box-shadow:
+          0 0 40px rgba(255, 80, 220, 0.80);
+
+      }
+
+      body[data-av-state="reveal"] .ring-three {
+
+        border-top-color:
+          #ff72e8;
+
+        border-bottom-color:
+          #8b6cff;
+
+        opacity:
+          1;
+
+      }
+
+      body[data-av-state="reveal"] .status-dot {
+
+        background:
+          #ff6cdd;
+
+        box-shadow:
+          0 0 20px rgba(255, 100, 220, 1);
+
+      }
+
+
+      /* =====================================
+         SPEAKING PULSE
+      ===================================== */
+
+      @keyframes speakingPulse {
+
+        0%, 100% {
+          transform: scale(0.96);
+        }
+
+        50% {
+          transform: scale(1.07);
+        }
+
+      }
+
+    `;
+
+    document.head.appendChild(style);
+  }
+
+
+  installStateStyles();
 
 
   /* =========================================
@@ -96,53 +615,158 @@ document.addEventListener("DOMContentLoaded", function () {
     new SpeechRecognition();
 
 
-  recognition.continuous = false;
+  recognition.continuous =
+    false;
 
-  recognition.interimResults = false;
+  recognition.interimResults =
+    false;
 
-  recognition.lang = "en-IN";
+  recognition.lang =
+    "en-IN";
 
 
   /* =========================================
      STATE VARIABLES
   ========================================= */
 
-  let isListening = false;
+  let isListening =
+    false;
 
-  let isSpeaking = false;
+  let isSpeaking =
+    false;
 
-  let recognitionActive = false;
+  let recognitionActive =
+    false;
 
-  let currentUtterance = null;
+  let isThinking =
+    false;
+
+  let currentUtterance =
+    null;
 
 
   /* =========================================
-     UI STATE
+     APPLY AV STATE
   ========================================= */
 
-  function setState(state) {
+  function applyState(state) {
 
     const normalized =
       String(state || "standby")
-        .toLowerCase();
+        .toLowerCase()
+        .trim();
 
 
-    if (window.AV_UI &&
-        typeof window.AV_UI.setState === "function") {
+    document.body.dataset.avState =
+      normalized;
 
-      window.AV_UI.setState(
-        normalized
-      );
 
-    } else {
+    /*
+      Optional external AV_UI
+    */
 
-      console.log(
-        "AV UI STATE →",
-        normalized
-      );
+    if (
+      window.AV_UI &&
+      typeof window.AV_UI.setState ===
+      "function"
+    ) {
+
+      try {
+
+        window.AV_UI.setState(
+          normalized
+        );
+
+      } catch (error) {
+
+        console.warn(
+          "AV_UI STATE ERROR:",
+          error
+        );
+
+      }
+
     }
 
+
+    /*
+      Visible status text
+    */
+
+    const labels = {
+
+      standby:
+        "STANDBY",
+
+      listening:
+        "LISTENING",
+
+      thinking:
+        "THINKING",
+
+      speaking:
+        "AV SPEAKING",
+
+      reveal:
+        "REVEAL"
+
+    };
+
+
+    if (statusText) {
+
+      statusText.textContent =
+        labels[normalized] ||
+        "STANDBY";
+
+    }
+
+
+    /*
+      Status dot
+    */
+
+    if (statusDot) {
+
+      statusDot.classList
+        .remove(
+          "state-standby",
+          "state-listening",
+          "state-thinking",
+          "state-speaking",
+          "state-reveal"
+        );
+
+      statusDot.classList
+        .add(
+          "state-" + normalized
+        );
+
+    }
+
+
+    /*
+      Helpful browser-console log
+    */
+
+    console.log(
+      "💜 AV UI STATE →",
+      normalized.toUpperCase()
+    );
+
   }
+
+
+  /* =========================================
+     PUBLIC STATE ACCESS
+  ========================================= */
+
+  window.AV_STATE =
+    function (state) {
+
+      applyState(state);
+
+    };
 
 
   /* =========================================
@@ -194,6 +818,7 @@ document.addEventListener("DOMContentLoaded", function () {
       )
 
       .trim();
+
   }
 
 
@@ -216,9 +841,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-    currentUtterance = null;
 
-    isSpeaking = false;
+    currentUtterance =
+      null;
+
+    isSpeaking =
+      false;
 
   }
 
@@ -235,13 +863,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     if (!voices.length) {
+
       return null;
+
     }
 
-
-    /*
-      Prefer Indian English voices.
-    */
 
     const preferredNames = [
 
@@ -262,68 +888,73 @@ document.addEventListener("DOMContentLoaded", function () {
     ) {
 
       const voice =
-        voices.find(function (item) {
+        voices.find(
+          function (item) {
 
-          return item.name
-            .toLowerCase()
-            .includes(
-              preferredName.toLowerCase()
-            );
+            return item.name
+              .toLowerCase()
+              .includes(
+                preferredName
+                  .toLowerCase()
+              );
 
-        });
+          }
+        );
 
 
       if (voice) {
+
         return voice;
+
       }
 
     }
 
 
-    /*
-      Next preference:
-      Indian English / Hindi.
-    */
-
     const indianVoice =
-      voices.find(function (voice) {
+      voices.find(
+        function (voice) {
 
-        const language =
-          String(
-            voice.lang || ""
-          ).toLowerCase();
+          const language =
+            String(
+              voice.lang || ""
+            ).toLowerCase();
 
-        return (
-          language === "en-in" ||
-          language === "hi-in"
-        );
 
-      });
+          return (
+            language === "en-in" ||
+            language === "hi-in"
+          );
+
+        }
+      );
 
 
     if (indianVoice) {
+
       return indianVoice;
+
     }
 
 
-    /*
-      Final fallback:
-      English voice.
-    */
-
     const englishVoice =
-      voices.find(function (voice) {
+      voices.find(
+        function (voice) {
 
-        return String(
-          voice.lang || ""
-        )
-        .toLowerCase()
-        .startsWith("en");
+          return String(
+            voice.lang || ""
+          )
+          .toLowerCase()
+          .startsWith("en");
 
-      });
+        }
+      );
 
 
-    return englishVoice || voices[0];
+    return (
+      englishVoice ||
+      voices[0]
+    );
 
   }
 
@@ -334,197 +965,212 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function speak(text) {
 
-    return new Promise(function (resolve) {
+    return new Promise(
+      function (resolve) {
 
-      const cleanText =
-        cleanSpeechText(text);
-
-
-      if (!cleanText) {
-
-        console.warn(
-          "AV SPEECH → Empty response."
-        );
-
-        setState("standby");
-
-        resolve();
-
-        return;
-      }
+        const cleanText =
+          cleanSpeechText(text);
 
 
-      stopSpeaking();
+        if (!cleanText) {
+
+          applyState(
+            "standby"
+          );
+
+          resolve();
+
+          return;
+
+        }
 
 
-      if (
-        !window.speechSynthesis
-      ) {
-
-        console.error(
-          "AV SPEECH → Browser speech synthesis unavailable."
-        );
-
-        setState("standby");
-
-        resolve();
-
-        return;
-      }
+        stopSpeaking();
 
 
-      console.log(
-        "🔊 AV SPEECH → Speaking:",
-        cleanText
-      );
+        if (
+          !window.speechSynthesis
+        ) {
+
+          console.error(
+            "AV SPEECH → Browser speech synthesis unavailable."
+          );
+
+          applyState(
+            "standby"
+          );
+
+          resolve();
+
+          return;
+
+        }
 
 
-      setState("speaking");
-
-
-      const utterance =
-        new SpeechSynthesisUtterance(
+        console.log(
+          "🔊 AV SPEECH →",
           cleanText
         );
 
 
-      currentUtterance =
-        utterance;
-
-
-      const voice =
-        getPreferredVoice();
-
-
-      if (voice) {
-
-        utterance.voice =
-          voice;
-
-        console.log(
-          "🔊 AV VOICE →",
-          voice.name,
-          voice.lang
+        applyState(
+          "speaking"
         );
 
-      }
+
+        const utterance =
+          new SpeechSynthesisUtterance(
+            cleanText
+          );
 
 
-      /*
-        Indian English friendly settings.
-        Browser/voice may interpret these differently.
-      */
-
-      utterance.lang =
-        voice?.lang || "en-IN";
+        currentUtterance =
+          utterance;
 
 
-      utterance.rate =
-        0.95;
+        const voice =
+          getPreferredVoice();
 
 
-      utterance.pitch =
-        1.05;
+        if (voice) {
 
+          utterance.voice =
+            voice;
 
-      utterance.volume =
-        1.0;
-
-
-      utterance.onstart =
-        function () {
-
-          isSpeaking = true;
 
           console.log(
-            "🔊 AV SPEECH → SPEAKING"
+            "🔊 AV VOICE →",
+            voice.name,
+            voice.lang
           );
-
-          setState("speaking");
-
-        };
-
-
-      utterance.onend =
-        function () {
-
-          console.log(
-            "🔊 AV SPEECH → FINISHED"
-          );
-
-          isSpeaking = false;
-
-          currentUtterance =
-            null;
-
-
-          if (!isListening) {
-
-            setState("standby");
-
-          }
-
-
-          resolve();
-
-        };
-
-
-      utterance.onerror =
-        function (event) {
-
-          console.error(
-            "AV SPEECH SYNTHESIS ERROR:",
-            event.error
-          );
-
-          isSpeaking = false;
-
-          currentUtterance =
-            null;
-
-          setState("standby");
-
-          resolve();
-
-        };
-
-
-      /*
-        Some Android browsers need a
-        small delay before speaking.
-      */
-
-      setTimeout(function () {
-
-        try {
-
-          window.speechSynthesis
-            .speak(
-              utterance
-            );
-
-        } catch (error) {
-
-          console.error(
-            "AV SPEECH START ERROR:",
-            error
-          );
-
-          isSpeaking = false;
-
-          currentUtterance =
-            null;
-
-          setState("standby");
-
-          resolve();
 
         }
 
-      }, 80);
 
-    });
+        utterance.lang =
+          voice?.lang ||
+          "en-IN";
+
+
+        utterance.rate =
+          0.95;
+
+
+        utterance.pitch =
+          1.05;
+
+
+        utterance.volume =
+          1.0;
+
+
+        utterance.onstart =
+          function () {
+
+            isSpeaking =
+              true;
+
+
+            applyState(
+              "speaking"
+            );
+
+          };
+
+
+        utterance.onend =
+          function () {
+
+            isSpeaking =
+              false;
+
+
+            currentUtterance =
+              null;
+
+
+            if (!isListening) {
+
+              applyState(
+                "standby"
+              );
+
+            }
+
+
+            resolve();
+
+          };
+
+
+        utterance.onerror =
+          function (event) {
+
+            console.error(
+              "AV SPEECH SYNTHESIS ERROR:",
+              event.error
+            );
+
+
+            isSpeaking =
+              false;
+
+
+            currentUtterance =
+              null;
+
+
+            applyState(
+              "standby"
+            );
+
+
+            resolve();
+
+          };
+
+
+        setTimeout(
+          function () {
+
+            try {
+
+              window.speechSynthesis
+                .speak(
+                  utterance
+                );
+
+            } catch (error) {
+
+              console.error(
+                "AV SPEECH START ERROR:",
+                error
+              );
+
+
+              isSpeaking =
+                false;
+
+
+              currentUtterance =
+                null;
+
+
+              applyState(
+                "standby"
+              );
+
+
+              resolve();
+
+            }
+
+          },
+          80
+        );
+
+      }
+    );
 
   }
 
@@ -546,6 +1192,7 @@ document.addEventListener("DOMContentLoaded", function () {
           window.speechSynthesis
             .getVoices();
 
+
         console.log(
           "🔊 AV VOICES LOADED:",
           voices.length
@@ -555,10 +1202,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   }
 
-
-  /*
-    Initial voice loading attempt.
-  */
 
   window.speechSynthesis
     .getVoices();
@@ -570,10 +1213,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function isRevealCommand(message) {
 
-    const text =
-      String(message || "")
-        .toLowerCase()
-        .trim();
+    const 
+      text =
+        String(message || "")
+          .toLowerCase()
+          .trim();
 
 
     const revealKeywords = [
@@ -630,14 +1274,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setTimeout(function () {
 
-      /*
-        Future avatar system will be
-        connected here.
-
-        For now the Core simply returns
-        to standby.
-      */
-
       if (!isSpeaking &&
           !isListening) {
 
@@ -675,8 +1311,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /*
-      Reveal command is detected
-      before normal processing.
+      Reveal command detection.
     */
 
     if (
@@ -779,11 +1414,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function startListening() {
 
-    /*
-      If AV is speaking,
-      stop it first.
-    */
-
     if (isSpeaking) {
 
       console.log(
@@ -794,10 +1424,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-
-    /*
-      Prevent duplicate recognition.start()
-    */
 
     if (
       isListening ||
@@ -903,11 +1529,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
 
-      /*
-        Recognition has heard the user.
-        Move immediately to THINKING.
-      */
-
       setState(
         "thinking"
       );
@@ -939,18 +1560,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
 
-      /*
-        Don't overwrite SPEAKING state.
-      */
-
       if (!isSpeaking) {
-
-        /*
-          processVoiceMessage() may already
-          have moved the system to THINKING.
-          Therefore we don't force standby
-          here if an AI request is running.
-        */
 
         console.log(
           "AV → Recognition ended."
@@ -1145,7 +1755,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   console.log(
     "================================="
-
   );
 
 });
